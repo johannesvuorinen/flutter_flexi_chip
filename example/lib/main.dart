@@ -79,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 color: Colors.red,
                 borderWidth: 2,
                 borderRadius: BorderRadius.all(Radius.circular(15)),
-                labelStyle: TextStyle(fontWeight: FontWeight.bold),
+                foregroundStyle: TextStyle(fontWeight: FontWeight.bold),
               ),
               label: const Text('TS'),
               // trailing: const Icon(Icons.close),

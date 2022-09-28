@@ -6,6 +6,7 @@ class FlexiChipStyle {
     this.clipBehavior = Clip.antiAlias,
     this.margin,
     this.padding = FlexiChipStyle.defaultPadding,
+    this.foregroundStyle,
     this.foregroundColor = FlexiChipStyle.defaultColor,
     this.foregroundSpacing = 8,
     this.backgroundColor = FlexiChipStyle.defaultColor,
@@ -19,7 +20,6 @@ class FlexiChipStyle {
     this.shadowColor,
     this.elevation = 0,
     this.pressElevation = 0,
-    this.labelStyle,
   });
 
   const FlexiChipStyle.outlined({
@@ -36,7 +36,7 @@ class FlexiChipStyle {
     this.shadowColor,
     this.elevation = 0,
     this.pressElevation = 0,
-    this.labelStyle,
+    this.foregroundStyle,
   })  : foregroundColor = color,
         foregroundSpacing = spacing,
         borderColor = color,
@@ -49,15 +49,15 @@ class FlexiChipStyle {
     this.margin,
     this.padding = FlexiChipStyle.defaultPadding,
     Color color = FlexiChipStyle.defaultColor,
-    this.foregroundSpacing = 8,
+    this.foregroundStyle,
     this.foregroundColor = const Color(0xFFFFFFFF),
+    this.foregroundSpacing = 8,
     this.clipBehavior = Clip.antiAlias,
     this.borderRadius = FlexiChipStyle.defaultBorderRadius,
     this.disabledColor,
     this.shadowColor,
     this.elevation = 1,
     this.pressElevation = 2,
-    this.labelStyle,
   })  : backgroundColor = color,
         backgroundOpacity = 1,
         borderColor = color,
@@ -78,14 +78,13 @@ class FlexiChipStyle {
   final double elevation;
   final double pressElevation;
 
+  final TextStyle? foregroundStyle;
   final Color foregroundColor;
   final double foregroundSpacing;
 
   final Color? disabledColor;
   final Color? shadowColor;
   final Clip clipBehavior;
-
-  final TextStyle? labelStyle;
 
   final Color? backgroundColor;
 
@@ -113,6 +112,7 @@ class FlexiChipStyle {
   /// the given fields replaced with the new values.
   FlexiChipStyle copyWith({
     bool? useCheckmark,
+    TextStyle? foregroundStyle,
     Color? foregroundColor,
     double? foregroundSpacing,
     Color? backgroundColor,
@@ -123,7 +123,6 @@ class FlexiChipStyle {
     EdgeInsetsGeometry? padding,
     double? elevation,
     double? pressElevation,
-    TextStyle? labelStyle,
     Color? borderColor,
     double? borderOpacity,
     double? borderWidth,
@@ -138,6 +137,7 @@ class FlexiChipStyle {
   }) {
     return FlexiChipStyle(
       useCheckmark: useCheckmark ?? this.useCheckmark,
+      foregroundStyle: foregroundStyle ?? this.foregroundStyle,
       foregroundColor: foregroundColor ?? this.foregroundColor,
       foregroundSpacing: foregroundSpacing ?? this.foregroundSpacing,
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -148,7 +148,6 @@ class FlexiChipStyle {
       padding: padding ?? this.padding,
       elevation: elevation ?? this.elevation,
       pressElevation: pressElevation ?? this.pressElevation,
-      labelStyle: labelStyle ?? this.labelStyle,
       borderColor: borderColor ?? this.borderColor,
       borderOpacity: borderOpacity ?? this.borderOpacity,
       borderWidth: borderWidth ?? this.borderWidth,
@@ -173,6 +172,7 @@ class FlexiChipStyle {
 
     return copyWith(
       useCheckmark: other.useCheckmark,
+      foregroundStyle: other.foregroundStyle,
       foregroundColor: other.foregroundColor,
       foregroundSpacing: other.foregroundSpacing,
       backgroundColor: other.backgroundColor,
@@ -182,7 +182,6 @@ class FlexiChipStyle {
       padding: other.padding,
       elevation: other.elevation,
       pressElevation: other.pressElevation,
-      labelStyle: other.labelStyle,
       borderColor: other.borderColor,
       borderOpacity: other.borderOpacity,
       borderWidth: other.borderWidth,

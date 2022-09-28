@@ -71,7 +71,7 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip> {
       );
   TextStyle get foregroundStyle => const TextStyle()
       .copyWith(color: effectiveStyle.foregroundColor)
-      .merge(effectiveStyle.labelStyle);
+      .merge(effectiveStyle.foregroundStyle);
 
   BorderRadiusTween? _containerRadiusTween;
   DecorationTween? _containerDecorationTween;
