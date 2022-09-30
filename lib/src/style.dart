@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class FlexiChipStyle {
   const FlexiChipStyle({
@@ -7,11 +7,11 @@ class FlexiChipStyle {
     this.margin,
     this.padding = FlexiChipStyle.defaultPadding,
     this.foregroundStyle,
-    this.foregroundColor = FlexiChipStyle.defaultColor,
+    this.foregroundColor,
     this.foregroundSpacing = 8,
-    this.backgroundColor = FlexiChipStyle.defaultColor,
+    this.backgroundColor,
     this.backgroundOpacity = .12,
-    this.borderColor = FlexiChipStyle.defaultColor,
+    this.borderColor,
     this.borderOpacity = 1,
     this.borderWidth = 1,
     this.borderRadius = FlexiChipStyle.defaultBorderRadius,
@@ -19,15 +19,16 @@ class FlexiChipStyle {
     this.disabledColor,
     this.shadowColor,
     this.elevation = 0,
-    this.pressElevation = 0,
+    this.pressElevation = 8,
   });
 
+  /// Chip style with an outlined border and no fill color.
   const FlexiChipStyle.outlined({
     this.useCheckmark = false,
     this.margin,
     this.padding = FlexiChipStyle.defaultPadding,
     double spacing = 8,
-    Color color = FlexiChipStyle.defaultColor,
+    Color? color,
     this.clipBehavior = Clip.antiAlias,
     this.borderOpacity = 1,
     this.borderWidth = 1,
@@ -44,11 +45,12 @@ class FlexiChipStyle {
         backgroundColor = null,
         backgroundOpacity = 0;
 
+  /// Chip style with fill color whose material elevates when pressed.
   const FlexiChipStyle.elevated({
     this.useCheckmark = false,
     this.margin,
     this.padding = FlexiChipStyle.defaultPadding,
-    Color color = FlexiChipStyle.defaultColor,
+    Color? color,
     this.foregroundStyle,
     this.foregroundColor = const Color(0xFFFFFFFF),
     this.foregroundSpacing = 8,
@@ -56,8 +58,8 @@ class FlexiChipStyle {
     this.borderRadius = FlexiChipStyle.defaultBorderRadius,
     this.disabledColor,
     this.shadowColor,
-    this.elevation = 1,
-    this.pressElevation = 2,
+    this.elevation = 0,
+    this.pressElevation = 8,
   })  : backgroundColor = color,
         backgroundOpacity = 1,
         borderColor = color,
@@ -65,11 +67,27 @@ class FlexiChipStyle {
         borderOpacity = 0,
         borderWidth = 0;
 
+  /// A [MaterialStateFlexiChipStyle] created
+  /// from a [MaterialPropertyResolver<FlexiChipStyle>]
+  /// callback alone.
+  ///
+  /// If used as a regular FlexiChipStyle,
+  /// the FlexiChipStyle resolved in the default state will be used.
+  ///
+  /// Used by [MaterialStateFlexiChipStyle.resolveWith].
+  static MaterialStateFlexiChipStyle stated(
+    MaterialPropertyResolver<FlexiChipStyle> callback,
+  ) =>
+      _MaterialStateFlexiChipStyle(callback);
+
   static const defaultColor = Color(0xDD000000);
   static const defaultBorderRadius = BorderRadius.all(Radius.circular(8));
   static const defaultPadding = EdgeInsets.symmetric(horizontal: 8);
   static const defaultHeight = 32.0;
   static const defaultIconSize = 18.0;
+  static const disabledBackgroundAlpha = 0x0c; // 38% * 12% = 5%
+  static const disabledBorderAlpha = 0x0c; // 38% * 12% = 5%
+  static const disabledForegroundAlpha = 0x61; // 38%
 
   final bool useCheckmark;
   final EdgeInsetsGeometry? margin;
@@ -79,7 +97,7 @@ class FlexiChipStyle {
   final double pressElevation;
 
   final TextStyle? foregroundStyle;
-  final Color foregroundColor;
+  final Color? foregroundColor;
   final double foregroundSpacing;
 
   final Color? disabledColor;
@@ -91,7 +109,7 @@ class FlexiChipStyle {
   /// Chip background opacity
   final double backgroundOpacity;
 
-  final Color borderColor;
+  final Color? borderColor;
 
   /// Chip border opacity
   final double borderOpacity;
@@ -196,4 +214,51 @@ class FlexiChipStyle {
       // materialTapTargetSize: other.materialTapTargetSize,
     );
   }
+}
+
+abstract class MaterialStateFlexiChipStyle extends FlexiChipStyle
+    implements MaterialStateProperty<FlexiChipStyle?> {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const MaterialStateFlexiChipStyle(FlexiChipStyle defaultValue);
+
+  /// Creates a [MaterialStateFlexiChipStyle]
+  /// from a [MaterialPropertyResolver<FlexiChipStyle>]
+  /// callback function.
+  ///
+  /// If used as a regular color, the color resolved in the default state (the
+  /// empty set of states) will be used.
+  ///
+  /// The given callback parameter must return a non-null color in the default
+  /// state.
+  static MaterialStateFlexiChipStyle resolveWith(
+    MaterialPropertyResolver<FlexiChipStyle> callback,
+  ) =>
+      _MaterialStateFlexiChipStyle(callback);
+
+  /// Returns a [FlexiChipStyle] that's to be used when a Material component is
+  /// in the specified state. Return null to defer to the default value of the
+  /// widget or theme.
+  @override
+  FlexiChipStyle? resolve(Set<MaterialState> states);
+}
+
+/// A [MaterialStateFlexiChipStyle] created
+/// from a [MaterialPropertyResolver<FlexiChipStyle>]
+/// callback alone.
+///
+/// If used as a regular FlexiChipStyle,
+/// the FlexiChipStyle resolved in the default state will be used.
+///
+/// Used by [MaterialStateFlexiChipStyle.resolveWith].
+class _MaterialStateFlexiChipStyle extends MaterialStateFlexiChipStyle {
+  _MaterialStateFlexiChipStyle(this._resolve) : super(_resolve(_defaultStates));
+
+  final MaterialPropertyResolver<FlexiChipStyle> _resolve;
+
+  /// The default state for a Material component, the empty set of interaction states.
+  static const Set<MaterialState> _defaultStates = <MaterialState>{};
+
+  @override
+  FlexiChipStyle resolve(Set<MaterialState> states) => _resolve(states);
 }

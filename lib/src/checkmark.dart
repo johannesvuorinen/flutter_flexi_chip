@@ -20,7 +20,7 @@ class FlexiCheckmark extends StatelessWidget {
 
   double get progress => _progress ?? 0;
   Color get color => _color ?? const Color(0xDD000000);
-  double get width => _width ?? 3;
+  double get width => _width ?? 2;
   double get size => _size ?? 18;
 
   @override
