@@ -20,6 +20,8 @@ class FlexiChipStyle {
     this.shadowColor,
     this.elevation = 0,
     this.pressElevation = 8,
+    this.avatarColor,
+    this.avatarRadius = 12,
   });
 
   /// Chip style with an outlined border and no fill color.
@@ -38,6 +40,8 @@ class FlexiChipStyle {
     this.elevation = 0,
     this.pressElevation = 0,
     this.foregroundStyle,
+    this.avatarColor,
+    this.avatarRadius = 12,
   })  : foregroundColor = color,
         foregroundSpacing = spacing,
         borderColor = color,
@@ -60,6 +64,8 @@ class FlexiChipStyle {
     this.shadowColor,
     this.elevation = 0,
     this.pressElevation = 8,
+    this.avatarColor,
+    this.avatarRadius = 12,
   })  : backgroundColor = color,
         backgroundOpacity = 1,
         borderColor = color,
@@ -81,6 +87,7 @@ class FlexiChipStyle {
       _MaterialStateFlexiChipStyle(callback);
 
   static const defaultColor = Color(0xDD000000);
+  static const defaultShadowColor = Color(0xFF000000);
   static const defaultBorderRadius = BorderRadius.all(Radius.circular(8));
   static const defaultPadding = EdgeInsets.symmetric(horizontal: 8);
   static const defaultHeight = 32.0;
@@ -126,6 +133,10 @@ class FlexiChipStyle {
   /// This skips painting the border, but the border still has a [width].
   final BorderStyle borderStyle;
 
+  final double avatarRadius;
+
+  final Color? avatarColor;
+
   /// Creates a copy of this [FlexiChipStyle] but with
   /// the given fields replaced with the new values.
   FlexiChipStyle copyWith({
@@ -152,6 +163,8 @@ class FlexiChipStyle {
     BorderStyle? avatarBorderStyle,
     ShapeBorder? avatarBorderShape,
     Clip? clipBehavior,
+    double? avatarRadius,
+    Color? avatarColor,
   }) {
     return FlexiChipStyle(
       useCheckmark: useCheckmark ?? this.useCheckmark,
@@ -171,11 +184,8 @@ class FlexiChipStyle {
       borderWidth: borderWidth ?? this.borderWidth,
       borderRadius: borderRadius ?? this.borderRadius,
       borderStyle: borderStyle ?? this.borderStyle,
-      // avatarBorderColor: avatarBorderColor ?? this.avatarBorderColor,
-      // avatarBorderWidth: avatarBorderWidth ?? this.avatarBorderWidth,
-      // avatarBorderRadius: avatarBorderRadius ?? this.avatarBorderRadius,
-      // avatarBorderStyle: avatarBorderStyle ?? this.avatarBorderStyle,
-      // avatarBorderShape: avatarBorderShape ?? this.avatarBorderShape,
+      avatarColor: avatarColor ?? this.avatarColor,
+      avatarRadius: avatarRadius ?? this.avatarRadius,
       clipBehavior: clipBehavior ?? this.clipBehavior,
       // materialTapTargetSize:
       //     materialTapTargetSize ?? this.materialTapTargetSize,
@@ -205,11 +215,8 @@ class FlexiChipStyle {
       borderWidth: other.borderWidth,
       borderRadius: other.borderRadius,
       borderStyle: other.borderStyle,
-      // avatarBorderColor: other.avatarBorderColor,
-      // avatarBorderWidth: other.avatarBorderWidth,
-      // avatarBorderRadius: other.avatarBorderRadius,
-      // avatarBorderStyle: other.avatarBorderStyle,
-      // avatarBorderShape: other.avatarBorderShape,
+      avatarColor: other.avatarColor,
+      avatarRadius: other.avatarRadius,
       clipBehavior: other.clipBehavior,
       // materialTapTargetSize: other.materialTapTargetSize,
     );

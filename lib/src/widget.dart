@@ -6,6 +6,7 @@ class FlexiChip extends ImplicitlyAnimatedWidget {
   const FlexiChip({
     Key? key,
     required this.label,
+    this.avatar,
     this.leading,
     this.trailing,
     this.tooltip,
@@ -14,6 +15,9 @@ class FlexiChip extends ImplicitlyAnimatedWidget {
     this.style,
     this.selectedStyle,
     this.disabledStyle,
+    this.hoveredStyle,
+    this.focusedStyle,
+    this.pressedStyle,
     this.selected = false,
     this.disabled = false,
     this.onPressed,
@@ -28,6 +32,8 @@ class FlexiChip extends ImplicitlyAnimatedWidget {
         );
 
   final Widget label;
+
+  final ImageProvider? avatar;
 
   final Widget? leading;
 
@@ -55,6 +61,12 @@ class FlexiChip extends ImplicitlyAnimatedWidget {
 
   final FlexiChipStyle? disabledStyle;
 
+  final FlexiChipStyle? hoveredStyle;
+
+  final FlexiChipStyle? focusedStyle;
+
+  final FlexiChipStyle? pressedStyle;
+
   static const defaultDuration = Duration(milliseconds: 200);
 
   bool get enabled => !disabled;
@@ -69,39 +81,26 @@ class FlexiChip extends ImplicitlyAnimatedWidget {
 
 class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
     with MaterialStateMixin<FlexiChip> {
-  // FlexiChipStyle get style => const FlexiChipStyle().merge(widget.style);
-  // FlexiChipStyle get activeStyle => style.merge(widget.selectedStyle);
-  // FlexiChipStyle get effectiveStyle => widget.selected ? activeStyle : style;
-  // FlexiChipStyle get style {
-  //   print(materialStates);
-  //   final resolvedStyle = MaterialStateProperty.resolveAs<FlexiChipStyle?>(
-  //     widget.style,
-  //     materialStates,
-  //   );
-  //   return const FlexiChipStyle()
-  //       .merge(resolvedStyle)
-  //       .merge(isSelected ? widget.selectedStyle : null)
-  //       .merge(isDisabled ? widget.disabledStyle : null);
-  // }
-
   ThemeData? appTheme;
   ChipThemeData? chipTheme;
 
   FlexiChipStyle style = const FlexiChipStyle();
+
+  FlexiChipStyle? resolveStyle(FlexiChipStyle? style) {
+    return MaterialStateProperty.resolveAs<FlexiChipStyle?>(
+      style,
+      materialStates,
+    );
+  }
+
   void setStyle() {
-    final resolvedStyle = MaterialStateProperty.resolveAs<FlexiChipStyle?>(
-      widget.style,
-      materialStates,
-    );
-    final resolvedSelectedStyle =
-        MaterialStateProperty.resolveAs<FlexiChipStyle?>(
-      widget.selectedStyle,
-      materialStates,
-    );
     final result = const FlexiChipStyle()
-        .merge(resolvedStyle)
-        .merge(isSelected ? resolvedSelectedStyle : null)
-        .merge(isDisabled ? widget.disabledStyle : null);
+        .merge(resolveStyle(widget.style))
+        .merge(isSelected ? resolveStyle(widget.selectedStyle) : null)
+        .merge(isDisabled ? resolveStyle(widget.disabledStyle) : null)
+        .merge(isHovered ? resolveStyle(widget.hoveredStyle) : null)
+        .merge(isFocused ? resolveStyle(widget.focusedStyle) : null)
+        .merge(isPressed ? resolveStyle(widget.pressedStyle) : null);
     setState(() => style = result);
   }
 
@@ -193,6 +192,18 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
     return _containerColorTween?.evaluate(animation) ?? backgroundColor;
   }
 
+  ColorTween? _containerShadowColorTween;
+  Color get animatedContainerShadowColor {
+    return _containerShadowColorTween?.evaluate(animation) ??
+        style.shadowColor ??
+        FlexiChipStyle.defaultShadowColor;
+  }
+
+  Tween<double>? _containerElevationTween;
+  double get animatedContainerElevation {
+    return _containerElevationTween?.evaluate(animation) ?? 0.0;
+  }
+
   BorderRadiusTween? _containerRadiusTween;
   BorderRadiusGeometry? get animatedContainerRadius {
     return _containerRadiusTween?.evaluate(animation);
@@ -215,8 +226,8 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
   }
 
   TextStyleTween? _foregroundStyleTween;
-  TextStyle? get animatedForegroundStyle {
-    return _foregroundStyleTween?.evaluate(animation);
+  TextStyle get animatedForegroundStyle {
+    return const TextStyle().merge(_foregroundStyleTween?.evaluate(animation));
   }
 
   Tween<double>? _checkmarkTween;
@@ -225,17 +236,29 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
   }
 
   bool get hasCheckmark => style.useCheckmark && animatedCheckmark > 0;
+  bool get hasAvatar => widget.avatar != null || style.avatarColor != null;
   bool get hasLeading => widget.leading != null;
   bool get hasTrailing => widget.trailing != null;
 
   Widget? get leading {
-    return hasCheckmark
+    final withCheckmark = hasCheckmark
         ? FlexiCheckmark(
             progress: animatedCheckmark,
             color: animatedForegroundColor,
             size: FlexiChipStyle.defaultIconSize,
           )
         : null;
+
+    final withAvatar = hasAvatar
+        ? CircleAvatar(
+            radius: style.avatarRadius,
+            backgroundColor: style.avatarColor,
+            backgroundImage: widget.avatar,
+            child: withCheckmark,
+          )
+        : withCheckmark;
+
+    return widget.leading ?? withAvatar;
   }
 
   Widget? get trailing {
@@ -254,24 +277,26 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
         : null;
   }
 
-  bool _isPressing = false;
-  bool get isPressing => widget.canTap && _isPressing;
-
   void onTap() {
     setMaterialState(MaterialState.pressed, false);
-    setState(() => _isPressing = false);
     widget.onPressed?.call();
     widget.onSelected?.call(!widget.selected);
   }
 
   void onTapCancel() {
     setMaterialState(MaterialState.pressed, false);
-    setState(() => _isPressing = false);
   }
 
   void onTapDown(TapDownDetails details) {
     setMaterialState(MaterialState.pressed, true);
-    setState(() => _isPressing = true);
+  }
+
+  void onHover(bool value) {
+    setMaterialState(MaterialState.hovered, value);
+  }
+
+  void onFocus(bool value) {
+    setMaterialState(MaterialState.focused, value);
   }
 
   @override
@@ -318,6 +343,18 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
       (value) => DecorationTween(begin: value),
     ) as DecorationTween?;
 
+    _containerShadowColorTween = visitor(
+      _containerShadowColorTween,
+      style.shadowColor,
+      (value) => ColorTween(begin: value),
+    ) as ColorTween?;
+
+    _containerElevationTween = visitor(
+      _containerElevationTween,
+      style.elevation,
+      (value) => Tween<double>(begin: value),
+    ) as Tween<double>;
+
     _foregroundColorTween = visitor(
       _foregroundColorTween,
       foregroundColor,
@@ -337,6 +374,26 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
     ) as Tween<double>?;
   }
 
+  void didChangeMaterialState() {
+    didUpdateWidget(widget);
+  }
+
+  @override
+  void addMaterialState(MaterialState state) {
+    if (materialStates.add(state)) {
+      setState(() {});
+      didChangeMaterialState();
+    }
+  }
+
+  @override
+  void removeMaterialState(MaterialState state) {
+    if (materialStates.remove(state)) {
+      setState(() {});
+      didChangeMaterialState();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Semantics(
@@ -351,14 +408,18 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
           clipBehavior: style.clipBehavior,
           borderRadius: animatedContainerRadius,
           decoration: animatedContainerDecoration,
-          child: InkWell(
-            canRequestFocus: widget.enabled,
-            onTap: widget.canTap ? onTap : null,
-            onTapCancel: widget.canTap ? onTapCancel : null,
-            onTapDown: widget.canTap ? onTapDown : null,
-            mouseCursor: MaterialStateMouseCursor.clickable,
+          shape: animatedContainerBorder,
+          shadowColor: animatedContainerShadowColor,
+          elevation: animatedContainerElevation,
+          child: _ChipEvent(
+            onTap: onTap,
+            onTapCancel: onTapCancel,
+            onTapDown: onTapDown,
+            onHover: onHover,
+            onFocus: onFocus,
+            enabled: widget.canTap,
             child: _ChipForeground(
-              textStyle: const TextStyle().merge(animatedForegroundStyle),
+              textStyle: animatedForegroundStyle,
               iconTheme: IconThemeData(
                 color: animatedForegroundColor,
                 size: FlexiChipStyle.defaultIconSize,
@@ -381,24 +442,75 @@ class _ChipContainer extends StatelessWidget {
     Key? key,
     this.borderRadius,
     this.clipBehavior = Clip.antiAlias,
-    this.decoration,
+    this.elevation = 0.0,
+    required this.shadowColor,
+    required this.shape,
+    required this.decoration,
     required this.child,
   }) : super(key: key);
 
-  final Decoration? decoration;
   final BorderRadiusGeometry? borderRadius;
   final Clip clipBehavior;
+  final Color shadowColor;
+  final double elevation;
+  final ShapeBorder shape;
+  final Decoration decoration;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: FlexiChipStyle.defaultHeight,
-      decoration: decoration,
-      child: Material(
-        type: MaterialType.transparency,
-        clipBehavior: clipBehavior,
-        borderRadius: borderRadius,
+    return PhysicalShape(
+      color: Colors.transparent,
+      clipBehavior: clipBehavior,
+      shadowColor: shadowColor,
+      elevation: elevation,
+      clipper: ShapeBorderClipper(
+        textDirection: Directionality.maybeOf(context),
+        shape: shape,
+      ),
+      child: DecoratedBox(
+        decoration: decoration,
+        child: SizedBox(
+          height: FlexiChipStyle.defaultHeight,
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+class _ChipEvent extends StatelessWidget {
+  const _ChipEvent({
+    Key? key,
+    required this.child,
+    required this.onTap,
+    required this.onTapDown,
+    required this.onTapCancel,
+    required this.onHover,
+    required this.onFocus,
+    this.enabled = true,
+  }) : super(key: key);
+
+  final Widget child;
+  final bool enabled;
+  final GestureTapCallback onTap;
+  final GestureTapCancelCallback onTapCancel;
+  final GestureTapDownCallback onTapDown;
+  final ValueChanged<bool> onHover;
+  final ValueChanged<bool> onFocus;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        mouseCursor: MaterialStateMouseCursor.clickable,
+        canRequestFocus: enabled,
+        onTap: enabled ? onTap : null,
+        onTapCancel: enabled ? onTapCancel : null,
+        onTapDown: enabled ? onTapDown : null,
+        onHover: onHover,
+        onFocusChange: onFocus,
         child: child,
       ),
     );
