@@ -5,7 +5,7 @@ class FlexiChipStyle {
     this.useCheckmark = false,
     this.clipBehavior = Clip.antiAlias,
     this.margin,
-    this.padding = FlexiChipStyle.defaultPadding,
+    this.padding,
     this.foregroundStyle,
     this.foregroundColor,
     this.foregroundSpacing = 8,
@@ -19,7 +19,6 @@ class FlexiChipStyle {
     this.disabledColor,
     this.shadowColor,
     this.elevation = 0,
-    this.pressElevation = 8,
     this.avatarColor,
     this.avatarRadius = 12,
   });
@@ -28,7 +27,7 @@ class FlexiChipStyle {
   const FlexiChipStyle.outlined({
     this.useCheckmark = false,
     this.margin,
-    this.padding = FlexiChipStyle.defaultPadding,
+    this.padding,
     double spacing = 8,
     Color? color,
     this.clipBehavior = Clip.antiAlias,
@@ -38,12 +37,11 @@ class FlexiChipStyle {
     this.disabledColor,
     this.shadowColor,
     this.elevation = 0,
-    this.pressElevation = 0,
     this.foregroundStyle,
-    this.avatarColor,
     this.avatarRadius = 12,
   })  : foregroundColor = color,
         foregroundSpacing = spacing,
+        avatarColor = color,
         borderColor = color,
         borderStyle = BorderStyle.solid,
         backgroundColor = null,
@@ -53,7 +51,7 @@ class FlexiChipStyle {
   const FlexiChipStyle.elevated({
     this.useCheckmark = false,
     this.margin,
-    this.padding = FlexiChipStyle.defaultPadding,
+    this.padding,
     Color? color,
     this.foregroundStyle,
     this.foregroundColor = const Color(0xFFFFFFFF),
@@ -63,7 +61,6 @@ class FlexiChipStyle {
     this.disabledColor,
     this.shadowColor,
     this.elevation = 0,
-    this.pressElevation = 8,
     this.avatarColor,
     this.avatarRadius = 12,
   })  : backgroundColor = color,
@@ -90,6 +87,7 @@ class FlexiChipStyle {
   static const defaultShadowColor = Color(0xFF000000);
   static const defaultBorderRadius = BorderRadius.all(Radius.circular(8));
   static const defaultPadding = EdgeInsets.symmetric(horizontal: 8);
+  static const defaultPaddingWithAvatar = EdgeInsets.symmetric(horizontal: 4);
   static const defaultHeight = 32.0;
   static const defaultIconSize = 18.0;
   static const disabledBackgroundAlpha = 0x0c; // 38% * 12% = 5%
@@ -98,10 +96,9 @@ class FlexiChipStyle {
 
   final bool useCheckmark;
   final EdgeInsetsGeometry? margin;
-  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? padding;
 
   final double elevation;
-  final double pressElevation;
 
   final TextStyle? foregroundStyle;
   final Color? foregroundColor;
@@ -151,7 +148,6 @@ class FlexiChipStyle {
     EdgeInsetsGeometry? margin,
     EdgeInsetsGeometry? padding,
     double? elevation,
-    double? pressElevation,
     Color? borderColor,
     double? borderOpacity,
     double? borderWidth,
@@ -178,7 +174,6 @@ class FlexiChipStyle {
       margin: margin ?? this.margin,
       padding: padding ?? this.padding,
       elevation: elevation ?? this.elevation,
-      pressElevation: pressElevation ?? this.pressElevation,
       borderColor: borderColor ?? this.borderColor,
       borderOpacity: borderOpacity ?? this.borderOpacity,
       borderWidth: borderWidth ?? this.borderWidth,
@@ -209,7 +204,6 @@ class FlexiChipStyle {
       margin: other.margin,
       padding: other.padding,
       elevation: other.elevation,
-      pressElevation: other.pressElevation,
       borderColor: other.borderColor,
       borderOpacity: other.borderOpacity,
       borderWidth: other.borderWidth,

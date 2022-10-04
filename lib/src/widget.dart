@@ -6,7 +6,8 @@ class FlexiChip extends ImplicitlyAnimatedWidget {
   const FlexiChip({
     Key? key,
     required this.label,
-    this.avatar,
+    this.avatarImage,
+    this.avatarText,
     this.leading,
     this.trailing,
     this.tooltip,
@@ -33,7 +34,9 @@ class FlexiChip extends ImplicitlyAnimatedWidget {
 
   final Widget label;
 
-  final ImageProvider? avatar;
+  final ImageProvider? avatarImage;
+
+  final Widget? avatarText;
 
   final Widget? leading;
 
@@ -145,10 +148,13 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
   }
 
   EdgeInsetsGeometry get containerPadding {
-    return style.padding.clamp(
+    final defaultPadding = hasAvatar
+        ? FlexiChipStyle.defaultPaddingWithAvatar
+        : FlexiChipStyle.defaultPadding;
+    final padding = style.padding ?? defaultPadding;
+    return padding.clamp(
       EdgeInsets.only(
-        left: hasLeading ? 8 : 10,
-        right: hasTrailing ? 8 : 10,
+        right: hasTrailing ? 8 : 0,
       ),
       EdgeInsetsGeometry.infinity,
     );
@@ -183,8 +189,23 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
 
   TextStyle get foregroundStyle {
     return const TextStyle()
+        .merge(appTheme?.chipTheme.labelStyle)
+        .merge(chipTheme?.labelStyle)
         .copyWith(color: foregroundColor)
         .merge(style.foregroundStyle);
+  }
+
+  BoxDecoration get avatarDecoration {
+    return BoxDecoration(
+      color: style.avatarColor,
+      image: widget.avatarImage != null
+          ? DecorationImage(
+              image: widget.avatarImage!,
+              fit: BoxFit.cover,
+            )
+          : null,
+      shape: BoxShape.circle,
+    );
   }
 
   ColorTween? _containerColorTween;
@@ -230,15 +251,28 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
     return const TextStyle().merge(_foregroundStyleTween?.evaluate(animation));
   }
 
+  DecorationTween? _avatarDecorationTween;
+  Decoration get animatedAvatarDecoration {
+    return _avatarDecorationTween?.evaluate(animation) ?? avatarDecoration;
+  }
+
   Tween<double>? _checkmarkTween;
   double get animatedCheckmark {
     return _checkmarkTween?.evaluate(animation) ?? 0;
   }
 
   bool get hasCheckmark => style.useCheckmark && animatedCheckmark > 0;
-  bool get hasAvatar => widget.avatar != null || style.avatarColor != null;
+  bool get hasAvatar => widget.avatarImage != null || widget.avatarText != null;
   bool get hasLeading => widget.leading != null;
-  bool get hasTrailing => widget.trailing != null;
+  bool get hasTrailing => widget.trailing != null || deleteButton != null;
+
+  Widget get label {
+    return Baseline(
+      baseline: foregroundStyle.fontSize ?? 14,
+      baselineType: TextBaseline.alphabetic,
+      child: widget.label,
+    );
+  }
 
   Widget? get leading {
     final withCheckmark = hasCheckmark
@@ -250,11 +284,9 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
         : null;
 
     final withAvatar = hasAvatar
-        ? CircleAvatar(
-            radius: style.avatarRadius,
-            backgroundColor: style.avatarColor,
-            backgroundImage: widget.avatar,
-            child: withCheckmark,
+        ? _ChipAvatar(
+            decoration: animatedAvatarDecoration,
+            child: withCheckmark ?? widget.avatarText!,
           )
         : withCheckmark;
 
@@ -269,10 +301,10 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
     final onDeleted = widget.onDeleted;
     return onDeleted != null
         ? FlexiChipButton(
-            onPressed: onDeleted,
             icon: widget.deleteIcon ?? const Icon(Icons.close),
             tooltip: widget.deleteTooltip,
             disabled: !widget.canTap,
+            onPressed: onDeleted,
           )
         : null;
   }
@@ -367,6 +399,12 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
       (value) => TextStyleTween(begin: value),
     ) as TextStyleTween?;
 
+    _avatarDecorationTween = visitor(
+      _avatarDecorationTween,
+      avatarDecoration,
+      (value) => DecorationTween(begin: value),
+    ) as DecorationTween?;
+
     _checkmarkTween = visitor(
       _checkmarkTween,
       widget.selected ? 1.0 : 0.0,
@@ -426,7 +464,7 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
               ),
               padding: containerPadding,
               spacing: style.foregroundSpacing,
-              label: widget.label,
+              label: label,
               leading: leading,
               trailing: trailing,
             ),
@@ -539,11 +577,11 @@ class _ChipForeground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // to keep the wrap spacing
+    const placeholder = SizedBox.square(dimension: 0);
     return DefaultTextStyle(
-      style: const TextStyle()
-          .merge(Theme.of(context).chipTheme.labelStyle)
-          .merge(ChipTheme.of(context).labelStyle)
-          .merge(textStyle),
+      style: textStyle,
+      textAlign: TextAlign.center,
       child: IconTheme(
         data: iconTheme,
         child: Padding(
@@ -555,10 +593,46 @@ class _ChipForeground extends StatelessWidget {
             runAlignment: WrapAlignment.center,
             spacing: spacing,
             children: [
-              leading,
+              leading ?? placeholder,
               label,
-              trailing,
+              trailing ?? placeholder,
             ].whereType<Widget>().toList(growable: false),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ChipAvatar extends StatelessWidget {
+  const _ChipAvatar({
+    Key? key,
+    required this.decoration,
+    this.child,
+  }) : super(key: key);
+
+  final Decoration decoration;
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 24,
+      height: 24,
+      child: DecoratedBox(
+        decoration: decoration,
+        child: DefaultTextStyle(
+          textAlign: TextAlign.center,
+          textHeightBehavior: const TextHeightBehavior(
+            leadingDistribution: TextLeadingDistribution.even,
+          ),
+          style: const TextStyle(
+            height: 1,
+            fontSize: 12,
+            color: Colors.white,
+          ),
+          child: Center(
+            child: child,
           ),
         ),
       ),

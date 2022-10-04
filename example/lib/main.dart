@@ -75,17 +75,21 @@ class _MyHomePageState extends State<MyHomePage> {
           spacing: 5,
           children: [
             FlexiChip(
-              style: FlexiChipStyle.stated((states) {
-                if (states.contains(MaterialState.selected)) {
-                  return const FlexiChipStyle.elevated(
-                    useCheckmark: true,
-                    color: Colors.green,
-                  );
-                }
-                return const FlexiChipStyle.outlined(
+              style: const FlexiChipStyle.outlined(
+                color: Colors.green,
+                borderRadius: BorderRadius.all(Radius.circular(25)),
+                borderWidth: 2,
+              ),
+              selectedStyle: FlexiChipStyle.stated((states) {
+                const base = FlexiChipStyle.elevated(
+                  useCheckmark: true,
                   color: Colors.green,
-                  borderWidth: 2,
+                  avatarColor: Colors.black54,
                 );
+                if (states.contains(MaterialState.pressed)) {
+                  return base.copyWith(elevation: 5);
+                }
+                return base;
               }),
               // style: const FlexiChipStyle.outlined(
               //   color: Colors.green,
@@ -96,6 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
               //   color: Colors.green,
               // ),
               label: const Text('Dart'),
+              avatarText: const Text('DT'),
               // trailing: const Icon(Icons.close),
               // disabled: true,
               selected: _selected,
@@ -112,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 foregroundStyle: TextStyle(fontWeight: FontWeight.bold),
               ),
               label: const Text('TS'),
-              trailing: const Icon(Icons.close),
+              // trailing: const Icon(Icons.calendar_month),
               tooltip: 'Typescript',
               // disabled: true,
               selected: _selected,
