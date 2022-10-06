@@ -672,22 +672,22 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
 class _ChipContainer extends StatelessWidget {
   const _ChipContainer({
     Key? key,
+    required this.child,
+    required this.decoration,
+    required this.shadowColor,
+    required this.shape,
     this.borderRadius,
     this.clipBehavior = Clip.antiAlias,
     this.elevation = 0.0,
-    required this.shadowColor,
-    required this.shape,
-    required this.decoration,
-    required this.child,
   }) : super(key: key);
 
+  final Widget child;
+  final Decoration decoration;
+  final Color shadowColor;
+  final ShapeBorder shape;
   final BorderRadiusGeometry? borderRadius;
   final Clip clipBehavior;
-  final Color shadowColor;
   final double elevation;
-  final ShapeBorder shape;
-  final Decoration decoration;
-  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -764,21 +764,21 @@ class _ChipEvent extends StatelessWidget {
 class _ChipForeground extends StatelessWidget {
   const _ChipForeground({
     Key? key,
+    required this.padding,
     required this.textStyle,
     required this.iconTheme,
     required this.label,
     this.leading,
     this.trailing,
-    required this.padding,
     this.spacing = 0.0,
   }) : super(key: key);
 
+  final EdgeInsetsGeometry padding;
   final TextStyle textStyle;
   final IconThemeData iconTheme;
   final Widget label;
   final Widget? leading;
   final Widget? trailing;
-  final EdgeInsetsGeometry padding;
   final double spacing;
 
   @override

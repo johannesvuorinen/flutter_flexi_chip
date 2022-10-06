@@ -226,8 +226,6 @@ class FlexiChipStyle {
       iconColor: iconColor ?? this.iconColor,
       iconSize: iconSize ?? this.iconSize,
       iconOpacity: iconOpacity ?? this.iconOpacity,
-      // materialTapTargetSize:
-      //     materialTapTargetSize ?? this.materialTapTargetSize,
     );
   }
 
@@ -264,7 +262,6 @@ class FlexiChipStyle {
       iconColor: other.iconColor,
       iconSize: other.iconSize,
       iconOpacity: other.iconOpacity,
-      // materialTapTargetSize: other.materialTapTargetSize,
     );
   }
 }
