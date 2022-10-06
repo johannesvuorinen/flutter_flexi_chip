@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 
 class FlexiChipStyle {
   const FlexiChipStyle({
-    this.useCheckmark = false,
-    this.clipBehavior = Clip.antiAlias,
     this.margin,
     this.padding,
+    this.clipBehavior = Clip.antiAlias,
+    this.shadowColor,
+    this.elevation = 0,
     this.foregroundStyle,
     this.foregroundColor,
-    this.foregroundSpacing = 8,
+    this.foregroundSpacing = FlexiChipStyle.defaultForegroundSpacing,
     this.backgroundColor,
     this.backgroundOpacity = .12,
     this.borderColor,
@@ -16,32 +17,45 @@ class FlexiChipStyle {
     this.borderWidth = 1,
     this.borderRadius = FlexiChipStyle.defaultBorderRadius,
     this.borderStyle = BorderStyle.none,
-    this.disabledColor,
-    this.shadowColor,
-    this.elevation = 0,
-    this.avatarColor,
-    this.avatarRadius = 12,
+    this.avatarSize = FlexiChipStyle.defaultAvatarSize,
+    this.avatarForegroundStyle,
+    this.avatarForegroundColor,
+    this.avatarBackgroundColor,
+    this.avatarBorderRadius,
+    this.checkmarkColor,
+    this.checkmarkSize = FlexiChipStyle.defaultCheckmarkSize,
+    this.checkmarkWidth = FlexiChipStyle.defaultCheckmarkWidth,
+    this.iconColor,
+    this.iconSize = FlexiChipStyle.defaultIconSize,
+    this.iconOpacity = 1,
   });
 
   /// Chip style with an outlined border and no fill color.
   const FlexiChipStyle.outlined({
-    this.useCheckmark = false,
     this.margin,
     this.padding,
-    double spacing = 8,
-    Color? color,
     this.clipBehavior = Clip.antiAlias,
+    this.shadowColor,
+    this.elevation = 0,
+    double spacing = FlexiChipStyle.defaultForegroundSpacing,
+    Color? color,
     this.borderOpacity = 1,
     this.borderWidth = 1,
     this.borderRadius = FlexiChipStyle.defaultBorderRadius,
-    this.disabledColor,
-    this.shadowColor,
-    this.elevation = 0,
     this.foregroundStyle,
-    this.avatarRadius = 12,
+    this.avatarSize = FlexiChipStyle.defaultAvatarSize,
+    this.avatarForegroundStyle,
+    this.avatarForegroundColor,
+    this.avatarBorderRadius,
+    this.checkmarkColor,
+    this.checkmarkSize = FlexiChipStyle.defaultCheckmarkSize,
+    this.checkmarkWidth = FlexiChipStyle.defaultCheckmarkWidth,
+    this.iconColor,
+    this.iconSize = FlexiChipStyle.defaultIconSize,
+    this.iconOpacity = 1,
   })  : foregroundColor = color,
         foregroundSpacing = spacing,
-        avatarColor = color,
+        avatarBackgroundColor = color,
         borderColor = color,
         borderStyle = BorderStyle.solid,
         backgroundColor = null,
@@ -49,20 +63,27 @@ class FlexiChipStyle {
 
   /// Chip style with fill color whose material elevates when pressed.
   const FlexiChipStyle.elevated({
-    this.useCheckmark = false,
     this.margin,
     this.padding,
+    this.clipBehavior = Clip.antiAlias,
+    this.shadowColor,
+    this.elevation = 0,
     Color? color,
     this.foregroundStyle,
     this.foregroundColor = const Color(0xFFFFFFFF),
-    this.foregroundSpacing = 8,
-    this.clipBehavior = Clip.antiAlias,
+    this.foregroundSpacing = FlexiChipStyle.defaultForegroundSpacing,
     this.borderRadius = FlexiChipStyle.defaultBorderRadius,
-    this.disabledColor,
-    this.shadowColor,
-    this.elevation = 0,
-    this.avatarColor,
-    this.avatarRadius = 12,
+    this.avatarSize = FlexiChipStyle.defaultAvatarSize,
+    this.avatarForegroundStyle,
+    this.avatarForegroundColor,
+    this.avatarBackgroundColor,
+    this.avatarBorderRadius,
+    this.checkmarkColor,
+    this.checkmarkSize = FlexiChipStyle.defaultCheckmarkSize,
+    this.checkmarkWidth = FlexiChipStyle.defaultCheckmarkWidth,
+    this.iconColor,
+    this.iconSize = FlexiChipStyle.defaultIconSize,
+    this.iconOpacity = 1,
   })  : backgroundColor = color,
         backgroundOpacity = 1,
         borderColor = color,
@@ -88,25 +109,30 @@ class FlexiChipStyle {
   static const defaultBorderRadius = BorderRadius.all(Radius.circular(8));
   static const defaultPadding = EdgeInsets.symmetric(horizontal: 8);
   static const defaultPaddingWithAvatar = EdgeInsets.symmetric(horizontal: 4);
+  static const defaultAvatarSize = Size.square(24);
   static const defaultHeight = 32.0;
   static const defaultIconSize = 18.0;
+  static const defaultCheckmarkWidth = 2.0;
+  static const defaultCheckmarkSize = 18.0;
+  static const defaultForegroundSpacing = 8.0;
   static const disabledBackgroundAlpha = 0x0c; // 38% * 12% = 5%
   static const disabledBorderAlpha = 0x0c; // 38% * 12% = 5%
   static const disabledForegroundAlpha = 0x61; // 38%
 
-  final bool useCheckmark;
+  final Color? checkmarkColor;
+  final double checkmarkWidth;
+  final double checkmarkSize;
+
   final EdgeInsetsGeometry? margin;
   final EdgeInsetsGeometry? padding;
 
+  final Clip clipBehavior;
+  final Color? shadowColor;
   final double elevation;
 
   final TextStyle? foregroundStyle;
   final Color? foregroundColor;
   final double foregroundSpacing;
-
-  final Color? disabledColor;
-  final Color? shadowColor;
-  final Clip clipBehavior;
 
   final Color? backgroundColor;
 
@@ -130,20 +156,24 @@ class FlexiChipStyle {
   /// This skips painting the border, but the border still has a [width].
   final BorderStyle borderStyle;
 
-  final double avatarRadius;
+  final Color? avatarBackgroundColor;
+  final Color? avatarForegroundColor;
+  final TextStyle? avatarForegroundStyle;
+  final BorderRadiusGeometry? avatarBorderRadius;
+  final Size avatarSize;
 
-  final Color? avatarColor;
+  final Color? iconColor;
+  final double iconSize;
+  final double iconOpacity;
 
   /// Creates a copy of this [FlexiChipStyle] but with
   /// the given fields replaced with the new values.
   FlexiChipStyle copyWith({
-    bool? useCheckmark,
     TextStyle? foregroundStyle,
     Color? foregroundColor,
     double? foregroundSpacing,
     Color? backgroundColor,
     double? backgroundOpacity,
-    Color? disabledColor,
     Color? shadowColor,
     EdgeInsetsGeometry? margin,
     EdgeInsetsGeometry? padding,
@@ -153,23 +183,25 @@ class FlexiChipStyle {
     double? borderWidth,
     BorderRadiusGeometry? borderRadius,
     BorderStyle? borderStyle,
-    Color? avatarBorderColor,
-    double? avatarBorderWidth,
-    BorderRadiusGeometry? avatarBorderRadius,
-    BorderStyle? avatarBorderStyle,
-    ShapeBorder? avatarBorderShape,
     Clip? clipBehavior,
-    double? avatarRadius,
-    Color? avatarColor,
+    Size? avatarSize,
+    TextStyle? avatarForegroundStyle,
+    Color? avatarForegroundColor,
+    Color? avatarBackgroundColor,
+    BorderRadiusGeometry? avatarBorderRadius,
+    Color? checkmarkColor,
+    double? checkmarkWidth,
+    double? checkmarkSize,
+    Color? iconColor,
+    double? iconSize,
+    double? iconOpacity,
   }) {
     return FlexiChipStyle(
-      useCheckmark: useCheckmark ?? this.useCheckmark,
       foregroundStyle: foregroundStyle ?? this.foregroundStyle,
       foregroundColor: foregroundColor ?? this.foregroundColor,
       foregroundSpacing: foregroundSpacing ?? this.foregroundSpacing,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       backgroundOpacity: backgroundOpacity ?? this.backgroundOpacity,
-      disabledColor: disabledColor ?? this.disabledColor,
       shadowColor: shadowColor ?? this.shadowColor,
       margin: margin ?? this.margin,
       padding: padding ?? this.padding,
@@ -179,9 +211,21 @@ class FlexiChipStyle {
       borderWidth: borderWidth ?? this.borderWidth,
       borderRadius: borderRadius ?? this.borderRadius,
       borderStyle: borderStyle ?? this.borderStyle,
-      avatarColor: avatarColor ?? this.avatarColor,
-      avatarRadius: avatarRadius ?? this.avatarRadius,
+      avatarSize: avatarSize ?? this.avatarSize,
+      avatarForegroundStyle:
+          avatarForegroundStyle ?? this.avatarForegroundStyle,
+      avatarForegroundColor:
+          avatarForegroundColor ?? this.avatarForegroundColor,
+      avatarBackgroundColor:
+          avatarBackgroundColor ?? this.avatarBackgroundColor,
+      avatarBorderRadius: avatarBorderRadius ?? this.avatarBorderRadius,
       clipBehavior: clipBehavior ?? this.clipBehavior,
+      checkmarkColor: checkmarkColor ?? this.checkmarkColor,
+      checkmarkWidth: checkmarkWidth ?? this.checkmarkWidth,
+      checkmarkSize: checkmarkSize ?? this.checkmarkSize,
+      iconColor: iconColor ?? this.iconColor,
+      iconSize: iconSize ?? this.iconSize,
+      iconOpacity: iconOpacity ?? this.iconOpacity,
       // materialTapTargetSize:
       //     materialTapTargetSize ?? this.materialTapTargetSize,
     );
@@ -194,13 +238,11 @@ class FlexiChipStyle {
     if (other == null) return this;
 
     return copyWith(
-      useCheckmark: other.useCheckmark,
       foregroundStyle: other.foregroundStyle,
       foregroundColor: other.foregroundColor,
       foregroundSpacing: other.foregroundSpacing,
       backgroundColor: other.backgroundColor,
       backgroundOpacity: other.backgroundOpacity,
-      disabledColor: other.disabledColor,
       margin: other.margin,
       padding: other.padding,
       elevation: other.elevation,
@@ -209,9 +251,19 @@ class FlexiChipStyle {
       borderWidth: other.borderWidth,
       borderRadius: other.borderRadius,
       borderStyle: other.borderStyle,
-      avatarColor: other.avatarColor,
-      avatarRadius: other.avatarRadius,
+      avatarSize: other.avatarSize,
+      avatarForegroundStyle: other.avatarForegroundStyle,
+      avatarForegroundColor: other.avatarForegroundColor,
+      avatarBackgroundColor: other.avatarBackgroundColor,
+      avatarBorderRadius: other.avatarBorderRadius,
       clipBehavior: other.clipBehavior,
+      checkmarkColor: other.checkmarkColor,
+      checkmarkWidth: other.checkmarkWidth,
+      checkmarkSize: other.checkmarkSize,
+      shadowColor: other.shadowColor,
+      iconColor: other.iconColor,
+      iconSize: other.iconSize,
+      iconOpacity: other.iconOpacity,
       // materialTapTargetSize: other.materialTapTargetSize,
     );
   }

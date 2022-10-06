@@ -3,25 +3,16 @@ import 'package:flutter/widgets.dart';
 class FlexiCheckmark extends StatelessWidget {
   const FlexiCheckmark({
     Key? key,
-    double? progress,
-    Color? color,
-    double? width,
-    double? size,
-  })  : _progress = progress,
-        _color = color,
-        _width = width,
-        _size = size,
-        super(key: key);
+    required this.progress,
+    required this.color,
+    required this.width,
+    required this.size,
+  }) : super(key: key);
 
-  final double? _progress;
-  final Color? _color;
-  final double? _width;
-  final double? _size;
-
-  double get progress => _progress ?? 0;
-  Color get color => _color ?? const Color(0xDD000000);
-  double get width => _width ?? 2;
-  double get size => _size ?? 18;
+  final double progress;
+  final Color color;
+  final double width;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +70,8 @@ class FlexiCheckmarkPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(FlexiCheckmarkPainter oldDelegate) {
-    return oldDelegate.progress != progress;
+    return oldDelegate.progress != progress ||
+        oldDelegate.color != color ||
+        oldDelegate.width != width;
   }
 }

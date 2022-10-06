@@ -21,6 +21,11 @@ class FlexiChip extends ImplicitlyAnimatedWidget {
     this.pressedStyle,
     this.selected = false,
     this.disabled = false,
+    this.checkmark = false,
+    this.autofocus = false,
+    this.focusNode,
+    this.splashColor,
+    this.splashFactory,
     this.onPressed,
     this.onDeleted,
     this.onSelected,
@@ -51,6 +56,16 @@ class FlexiChip extends ImplicitlyAnimatedWidget {
   final bool selected;
 
   final bool disabled;
+
+  final bool checkmark;
+
+  final bool autofocus;
+
+  final FocusNode? focusNode;
+
+  final Color? splashColor;
+
+  final InteractiveInkFeatureFactory? splashFactory;
 
   final VoidCallback? onPressed;
 
@@ -84,8 +99,10 @@ class FlexiChip extends ImplicitlyAnimatedWidget {
 
 class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
     with MaterialStateMixin<FlexiChip> {
-  ThemeData? appTheme;
-  ChipThemeData? chipTheme;
+  ThemeData appTheme = ThemeData();
+  ChipThemeData chipTheme = const ChipThemeData();
+  ChipThemeData defaultTheme = const ChipThemeData();
+  Brightness brightness = Brightness.light;
 
   FlexiChipStyle style = const FlexiChipStyle();
 
@@ -109,18 +126,18 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
 
   Color get defaultColor {
     return widget.selected
-        ? (appTheme?.colorScheme.primary ?? FlexiChipStyle.defaultColor)
-        : (chipTheme?.backgroundColor ??
-            appTheme?.chipTheme.backgroundColor ??
-            appTheme?.unselectedWidgetColor ??
-            FlexiChipStyle.defaultColor);
+        ? (appTheme.colorScheme.primary)
+        : (defaultTheme.backgroundColor ??
+            chipTheme.backgroundColor ??
+            appTheme.chipTheme.backgroundColor ??
+            appTheme.unselectedWidgetColor);
   }
 
   Color get defaultForegroundColor {
     return widget.selected
-        ? (appTheme?.colorScheme.primary ?? FlexiChipStyle.defaultColor)
-        : (chipTheme?.labelStyle?.color ??
-            appTheme?.chipTheme.labelStyle?.color ??
+        ? (appTheme.colorScheme.primary)
+        : (chipTheme.labelStyle?.color ??
+            appTheme.chipTheme.labelStyle?.color ??
             FlexiChipStyle.defaultColor);
   }
 
@@ -189,23 +206,67 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
 
   TextStyle get foregroundStyle {
     return const TextStyle()
-        .merge(appTheme?.chipTheme.labelStyle)
-        .merge(chipTheme?.labelStyle)
+        .merge(appTheme.chipTheme.labelStyle)
+        .merge(chipTheme.labelStyle)
+        // .merge(defaultTheme.labelStyle)
         .copyWith(color: foregroundColor)
         .merge(style.foregroundStyle);
   }
 
+  Color get avatarForegroundColor {
+    final brightness = ThemeData.estimateBrightnessForColor(
+      style.avatarBackgroundColor ?? backgroundColor,
+    );
+    final colorByBrightness =
+        brightness == Brightness.dark ? Colors.white : Colors.black87;
+    return style.avatarForegroundColor ?? colorByBrightness;
+  }
+
+  TextStyle get avatarForegroundStyle {
+    return const TextStyle(
+      height: 1,
+      fontSize: 12,
+    )
+        .copyWith(
+          color: avatarForegroundColor,
+        )
+        .merge(
+          style.avatarForegroundStyle,
+        );
+  }
+
+  ShapeBorder get avatarBorder {
+    final radius = style.avatarBorderRadius;
+    return radius != null
+        ? RoundedRectangleBorder(
+            borderRadius: radius,
+            side: BorderSide.none,
+          )
+        : const CircleBorder(
+            side: BorderSide.none,
+          );
+  }
+
   BoxDecoration get avatarDecoration {
     return BoxDecoration(
-      color: style.avatarColor,
+      color: style.avatarBackgroundColor,
       image: widget.avatarImage != null
           ? DecorationImage(
               image: widget.avatarImage!,
               fit: BoxFit.cover,
             )
           : null,
-      shape: BoxShape.circle,
+      shape: BoxShape.rectangle,
     );
+  }
+
+  Color get checkmarkColor {
+    return style.checkmarkColor ??
+        (hasAvatar ? avatarForegroundColor : foregroundColor);
+  }
+
+  Color get iconColor {
+    return style.iconColor ?? foregroundColor;
   }
 
   ColorTween? _containerColorTween;
@@ -251,17 +312,69 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
     return const TextStyle().merge(_foregroundStyleTween?.evaluate(animation));
   }
 
+  TextStyleTween? _avatarForegroundStyleTween;
+  TextStyle get animatedAvatarForegroundStyle {
+    return const TextStyle()
+        .merge(_avatarForegroundStyleTween?.evaluate(animation));
+  }
+
+  ColorTween? _avatarForegroundColorTween;
+  Color get animatedAvatarForegroundColor {
+    return _avatarForegroundColorTween?.evaluate(animation) ??
+        avatarForegroundColor;
+  }
+
+  ShapeBorderTween? _avatarBorderTween;
+  ShapeBorder get animatedAvatarBorder {
+    return _avatarBorderTween?.evaluate(animation) ?? avatarBorder;
+  }
+
   DecorationTween? _avatarDecorationTween;
   Decoration get animatedAvatarDecoration {
     return _avatarDecorationTween?.evaluate(animation) ?? avatarDecoration;
   }
 
-  Tween<double>? _checkmarkTween;
-  double get animatedCheckmark {
-    return _checkmarkTween?.evaluate(animation) ?? 0;
+  SizeTween? _avatarSizeTween;
+  Size get animatedAvatarSize {
+    return _avatarSizeTween?.evaluate(animation) ?? style.avatarSize;
   }
 
-  bool get hasCheckmark => style.useCheckmark && animatedCheckmark > 0;
+  ColorTween? _checkmarkColorTween;
+  Color get animatedCheckmarkColor {
+    return _checkmarkColorTween?.evaluate(animation) ?? checkmarkColor;
+  }
+
+  Tween<double>? _checkmarkProgressTween;
+  double get animatedCheckmarkProgress {
+    return _checkmarkProgressTween?.evaluate(animation) ?? 0;
+  }
+
+  Tween<double>? _checkmarkSizeTween;
+  double get animatedCheckmarkSize {
+    return _checkmarkSizeTween?.evaluate(animation) ?? style.checkmarkSize;
+  }
+
+  Tween<double>? _checkmarkWidthTween;
+  double get animatedCheckmarkWidth {
+    return _checkmarkWidthTween?.evaluate(animation) ?? style.checkmarkWidth;
+  }
+
+  ColorTween? _iconColorTween;
+  Color get animatedIconColor {
+    return _iconColorTween?.evaluate(animation) ?? iconColor;
+  }
+
+  Tween<double>? _iconSizeTween;
+  double get animatedIconSize {
+    return _iconSizeTween?.evaluate(animation) ?? style.iconSize;
+  }
+
+  Tween<double>? _iconOpacityTween;
+  double get animatedIconOpacity {
+    return _iconOpacityTween?.evaluate(animation) ?? style.iconOpacity;
+  }
+
+  bool get hasCheckmark => widget.checkmark && animatedCheckmarkProgress > 0;
   bool get hasAvatar => widget.avatarImage != null || widget.avatarText != null;
   bool get hasLeading => widget.leading != null;
   bool get hasTrailing => widget.trailing != null || deleteButton != null;
@@ -275,26 +388,32 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
   }
 
   Widget? get leading {
-    final withCheckmark = hasCheckmark
-        ? FlexiCheckmark(
-            progress: animatedCheckmark,
-            color: animatedForegroundColor,
-            size: FlexiChipStyle.defaultIconSize,
-          )
-        : null;
-
     final withAvatar = hasAvatar
         ? _ChipAvatar(
+            textStyle: animatedAvatarForegroundStyle,
             decoration: animatedAvatarDecoration,
-            child: withCheckmark ?? widget.avatarText!,
+            border: animatedAvatarBorder,
+            size: animatedAvatarSize,
+            child: checkmark ?? widget.avatarText!,
           )
-        : withCheckmark;
+        : checkmark;
 
     return widget.leading ?? withAvatar;
   }
 
   Widget? get trailing {
     return widget.trailing ?? deleteButton;
+  }
+
+  Widget? get checkmark {
+    return hasCheckmark
+        ? FlexiCheckmark(
+            progress: animatedCheckmarkProgress,
+            size: animatedCheckmarkSize,
+            width: animatedCheckmarkWidth,
+            color: animatedCheckmarkColor,
+          )
+        : null;
   }
 
   Widget? get deleteButton {
@@ -337,8 +456,18 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
     setMaterialState(MaterialState.selected, widget.selected);
     setStyle();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      appTheme = Theme.of(context);
-      chipTheme = ChipTheme.of(context);
+      setState(() {
+        appTheme = Theme.of(context);
+        chipTheme = ChipTheme.of(context);
+        brightness = chipTheme.brightness ?? appTheme.brightness;
+        defaultTheme = ChipThemeData.fromDefaults(
+          brightness: brightness,
+          secondaryColor: brightness == Brightness.dark
+              ? Colors.tealAccent[200]!
+              : appTheme.primaryColor,
+          labelStyle: const TextStyle().merge(appTheme.textTheme.bodyText1),
+        );
+      });
     });
     super.initState();
   }
@@ -399,15 +528,75 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
       (value) => TextStyleTween(begin: value),
     ) as TextStyleTween?;
 
+    _avatarForegroundStyleTween = visitor(
+      _avatarForegroundStyleTween,
+      avatarForegroundStyle,
+      (value) => TextStyleTween(begin: value),
+    ) as TextStyleTween?;
+
+    _avatarForegroundColorTween = visitor(
+      _avatarForegroundColorTween,
+      avatarForegroundColor,
+      (value) => ColorTween(begin: value),
+    ) as ColorTween?;
+
+    _avatarBorderTween = visitor(
+      _avatarBorderTween,
+      avatarBorder,
+      (value) => ShapeBorderTween(begin: value),
+    ) as ShapeBorderTween?;
+
     _avatarDecorationTween = visitor(
       _avatarDecorationTween,
       avatarDecoration,
       (value) => DecorationTween(begin: value),
     ) as DecorationTween?;
 
-    _checkmarkTween = visitor(
-      _checkmarkTween,
+    _avatarSizeTween = visitor(
+      _avatarSizeTween,
+      style.avatarSize,
+      (value) => SizeTween(begin: value),
+    ) as SizeTween?;
+
+    _checkmarkColorTween = visitor(
+      _checkmarkColorTween,
+      checkmarkColor,
+      (value) => ColorTween(begin: value),
+    ) as ColorTween?;
+
+    _checkmarkProgressTween = visitor(
+      _checkmarkProgressTween,
       widget.selected ? 1.0 : 0.0,
+      (value) => Tween<double>(begin: value),
+    ) as Tween<double>?;
+
+    _checkmarkSizeTween = visitor(
+      _checkmarkSizeTween,
+      style.checkmarkSize,
+      (value) => Tween<double>(begin: value),
+    ) as Tween<double>?;
+
+    _checkmarkWidthTween = visitor(
+      _checkmarkWidthTween,
+      style.checkmarkWidth,
+      (value) => Tween<double>(begin: value),
+    ) as Tween<double>?;
+
+    _iconColorTween = visitor(
+      _iconColorTween,
+      iconColor,
+      (value) => ColorTween(begin: value),
+    ) as ColorTween?;
+
+    _iconSizeTween = visitor(
+      _iconSizeTween,
+      style.iconSize,
+      (value) => Tween<double>(begin: value),
+    ) as Tween<double>?;
+
+    _iconOpacityTween = visitor(
+      _iconOpacityTween,
+      style.iconOpacity,
       (value) => Tween<double>(begin: value),
     ) as Tween<double>?;
   }
@@ -450,17 +639,22 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
           shadowColor: animatedContainerShadowColor,
           elevation: animatedContainerElevation,
           child: _ChipEvent(
+            enabled: widget.canTap,
+            autofocus: widget.autofocus,
+            focusNode: widget.focusNode,
+            splashColor: widget.splashColor,
+            splashFactory: widget.splashFactory,
             onTap: onTap,
             onTapCancel: onTapCancel,
             onTapDown: onTapDown,
             onHover: onHover,
             onFocus: onFocus,
-            enabled: widget.canTap,
             child: _ChipForeground(
               textStyle: animatedForegroundStyle,
               iconTheme: IconThemeData(
-                color: animatedForegroundColor,
-                size: FlexiChipStyle.defaultIconSize,
+                color: animatedIconColor,
+                size: animatedIconSize,
+                opacity: animatedIconOpacity,
               ),
               padding: containerPadding,
               spacing: style.foregroundSpacing,
@@ -526,11 +720,19 @@ class _ChipEvent extends StatelessWidget {
     required this.onTapCancel,
     required this.onHover,
     required this.onFocus,
+    this.splashColor,
+    this.splashFactory,
+    this.focusNode,
+    this.autofocus = false,
     this.enabled = true,
   }) : super(key: key);
 
   final Widget child;
   final bool enabled;
+  final bool autofocus;
+  final FocusNode? focusNode;
+  final Color? splashColor;
+  final InteractiveInkFeatureFactory? splashFactory;
   final GestureTapCallback onTap;
   final GestureTapCancelCallback onTapCancel;
   final GestureTapDownCallback onTapDown;
@@ -542,8 +744,12 @@ class _ChipEvent extends StatelessWidget {
     return Material(
       type: MaterialType.transparency,
       child: InkWell(
-        mouseCursor: MaterialStateMouseCursor.clickable,
         canRequestFocus: enabled,
+        autofocus: autofocus,
+        focusNode: focusNode,
+        splashColor: splashColor,
+        splashFactory: splashFactory,
+        mouseCursor: MaterialStateMouseCursor.clickable,
         onTap: enabled ? onTap : null,
         onTapCancel: enabled ? onTapCancel : null,
         onTapDown: enabled ? onTapDown : null,
@@ -581,7 +787,10 @@ class _ChipForeground extends StatelessWidget {
     const placeholder = SizedBox.square(dimension: 0);
     return DefaultTextStyle(
       style: textStyle,
-      textAlign: TextAlign.center,
+      overflow: TextOverflow.fade,
+      textAlign: TextAlign.start,
+      softWrap: false,
+      maxLines: 1,
       child: IconTheme(
         data: iconTheme,
         child: Padding(
@@ -608,31 +817,41 @@ class _ChipAvatar extends StatelessWidget {
   const _ChipAvatar({
     Key? key,
     required this.decoration,
+    required this.border,
+    required this.size,
+    required this.textStyle,
     this.child,
   }) : super(key: key);
 
+  final TextStyle textStyle;
   final Decoration decoration;
+  final ShapeBorder border;
+  final Size size;
   final Widget? child;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 24,
-      height: 24,
-      child: DecoratedBox(
-        decoration: decoration,
-        child: DefaultTextStyle(
-          textAlign: TextAlign.center,
-          textHeightBehavior: const TextHeightBehavior(
-            leadingDistribution: TextLeadingDistribution.even,
-          ),
-          style: const TextStyle(
-            height: 1,
-            fontSize: 12,
-            color: Colors.white,
-          ),
-          child: Center(
-            child: child,
+      width: size.width,
+      height: size.height,
+      child: PhysicalShape(
+        color: Colors.transparent,
+        clipper: ShapeBorderClipper(
+          textDirection: Directionality.maybeOf(context),
+          shape: border,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: DecoratedBox(
+          decoration: decoration,
+          child: DefaultTextStyle(
+            textAlign: TextAlign.center,
+            textHeightBehavior: const TextHeightBehavior(
+              leadingDistribution: TextLeadingDistribution.even,
+            ),
+            style: textStyle,
+            child: Center(
+              child: child,
+            ),
           ),
         ),
       ),
