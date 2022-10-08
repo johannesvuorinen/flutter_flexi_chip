@@ -5,7 +5,7 @@ class FlexiChipStyle {
   const FlexiChipStyle({
     this.margin,
     this.padding,
-    this.clipBehavior = Clip.antiAlias,
+    this.clipBehavior,
     this.shadowColor,
     this.elevation = 0,
     this.foregroundStyle,
@@ -25,18 +25,18 @@ class FlexiChipStyle {
     this.avatarBorderRadius,
     this.checkmarkColor,
     this.checkmarkSize = FlexiChipStyle.defaultCheckmarkSize,
-    this.checkmarkWidth = FlexiChipStyle.defaultCheckmarkWidth,
+    this.checkmarkWeight = FlexiChipStyle.defaultCheckmarkWeight,
     this.checkmarkStyle,
     this.iconColor,
+    this.iconOpacity,
     this.iconSize = FlexiChipStyle.defaultIconSize,
-    this.iconOpacity = 1,
   });
 
   /// Chip style with an outlined border and no fill color.
   const FlexiChipStyle.outlined({
     this.margin,
     this.padding,
-    this.clipBehavior = Clip.antiAlias,
+    this.clipBehavior,
     this.shadowColor,
     this.elevation = 0,
     double spacing = FlexiChipStyle.defaultForegroundSpacing,
@@ -51,11 +51,11 @@ class FlexiChipStyle {
     this.avatarBorderRadius,
     this.checkmarkColor,
     this.checkmarkSize = FlexiChipStyle.defaultCheckmarkSize,
-    this.checkmarkWidth = FlexiChipStyle.defaultCheckmarkWidth,
+    this.checkmarkWeight = FlexiChipStyle.defaultCheckmarkWeight,
     this.checkmarkStyle,
     this.iconColor,
+    this.iconOpacity,
     this.iconSize = FlexiChipStyle.defaultIconSize,
-    this.iconOpacity = 1,
   })  : foregroundColor = color,
         foregroundSpacing = spacing,
         avatarBackgroundColor = color,
@@ -68,7 +68,7 @@ class FlexiChipStyle {
   const FlexiChipStyle.elevated({
     this.margin,
     this.padding,
-    this.clipBehavior = Clip.antiAlias,
+    this.clipBehavior,
     this.shadowColor,
     this.elevation = 0,
     Color? color,
@@ -83,11 +83,11 @@ class FlexiChipStyle {
     this.avatarBorderRadius,
     this.checkmarkColor,
     this.checkmarkSize = FlexiChipStyle.defaultCheckmarkSize,
-    this.checkmarkWidth = FlexiChipStyle.defaultCheckmarkWidth,
+    this.checkmarkWeight = FlexiChipStyle.defaultCheckmarkWeight,
     this.checkmarkStyle,
     this.iconColor,
+    this.iconOpacity,
     this.iconSize = FlexiChipStyle.defaultIconSize,
-    this.iconOpacity = 1,
   })  : backgroundColor = color,
         backgroundOpacity = 1,
         borderColor = color,
@@ -98,11 +98,6 @@ class FlexiChipStyle {
   /// A [MaterialStateFlexiChipStyle] created
   /// from a [MaterialPropertyResolver<FlexiChipStyle>]
   /// callback alone.
-  ///
-  /// If used as a regular FlexiChipStyle,
-  /// the FlexiChipStyle resolved in the default state will be used.
-  ///
-  /// Used by [MaterialStateFlexiChipStyle.resolveWith].
   static MaterialStateFlexiChipStyle stated(
     MaterialPropertyResolver<FlexiChipStyle> callback,
   ) =>
@@ -110,66 +105,130 @@ class FlexiChipStyle {
 
   static const defaultColor = Color(0xDD000000);
   static const defaultShadowColor = Color(0xFF000000);
+  static const defaultClipBehavior = Clip.antiAlias;
   static const defaultBorderRadius = BorderRadius.all(Radius.circular(8));
   static const defaultPadding = EdgeInsets.symmetric(horizontal: 8);
   static const defaultPaddingWithAvatar = EdgeInsets.symmetric(horizontal: 4);
   static const defaultAvatarSize = Size.square(24);
   static const defaultHeight = 32.0;
   static const defaultIconSize = 18.0;
-  static const defaultCheckmarkWidth = 2.0;
+  static const defaultCheckmarkWeight = 2.0;
   static const defaultCheckmarkSize = 18.0;
   static const defaultForegroundSpacing = 8.0;
   static const disabledBackgroundAlpha = 0x0c; // 38% * 12% = 5%
   static const disabledBorderAlpha = 0x0c; // 38% * 12% = 5%
   static const disabledForegroundAlpha = 0x61; // 38%
 
+  /// The Color to be apply to the checkmark.
+  ///
+  /// If null fallback to [avatarForegroundColor] or [foregroundColor]
   final Color? checkmarkColor;
-  final double checkmarkWidth;
+
+  /// Stroke width of the checkmark.
+  ///
+  /// Defaults to [FlexiChipStyle.defaultCheckmarkWeight].
+  final double checkmarkWeight;
+
+  /// Defaults to [FlexiChipStyle.defaultCheckmarkSize].
   final double checkmarkSize;
+
+  /// Defaults to [CheckmarkStyle.sharp].
   final CheckmarkStyle? checkmarkStyle;
 
+  /// Empty space to surround the outside chip.
   final EdgeInsetsGeometry? margin;
+
+  /// The padding between the contents of the chip and the outside chip.
+  ///
+  /// If chip has avatar defaults to [FlexiChipStyle.defaultPaddingWithAvatar],
+  /// else defaults to [FlexiChipStyle.defaultPadding].
   final EdgeInsetsGeometry? padding;
 
-  final Clip clipBehavior;
+  /// The chip's content will be clipped (or not) according to this option.
+  ///
+  /// See the enum [Clip] for details of all possible options and their common use cases.
+  ///
+  /// Defaults to [FlexiChipStyle.defaultClipBehavior]
+  final Clip? clipBehavior;
+
+  /// When [elevation] is non zero the color to use for the chip's shadow color.
   final Color? shadowColor;
+
+  /// The chip's z-coordinate relative to the parent at which to place this physical object.
+  ///
+  /// The value is non-negative.
   final double elevation;
 
+  /// The style to be applied to the chip's label.
+  ///
+  /// The default label style is [TextTheme.bodyText1] from the overall
+  /// theme's [ThemeData.textTheme].
+  //
+  /// This only has an effect on widgets that respect the [DefaultTextStyle],
+  /// such as [Text].
   final TextStyle? foregroundStyle;
+
+  /// The color to be applied to the chip's label, icon, and checkmark
   final Color? foregroundColor;
+
+  /// How much space to place between chip's foreground widget in a run in the main axis.
   final double foregroundSpacing;
 
+  /// Color to be used for the chip's background.
   final Color? backgroundColor;
 
-  /// Chip background opacity
+  /// Opacity to be apply to [backgroundColor].
   final double backgroundOpacity;
 
+  /// Color to be used for the chip's border.
   final Color? borderColor;
 
-  /// Chip border opacity
+  /// Opacity to be apply to [borderColor].
   final double borderOpacity;
 
-  /// The width of this side of the border, in logical pixels.
+  /// The width of this side of the chip's border, in logical pixels.
   final double borderWidth;
 
-  /// The radii for each corner.
+  /// The radii for each corner of the chip's border.
   final BorderRadiusGeometry borderRadius;
 
-  /// The style of this side of the border.
+  /// The style of this side of the chip's border.
   ///
   /// To omit a side, set [style] to [BorderStyle.none].
   /// This skips painting the border, but the border still has a [weight].
   final BorderStyle borderStyle;
 
+  /// Color to be used for the avatar's background.
   final Color? avatarBackgroundColor;
+
+  /// Color to be used for the avatar's foreground (checkmark, or text).
   final Color? avatarForegroundColor;
+
+  /// The style to be applied to the avatar's label.
+  ///
+  /// The default label style is [TextTheme.bodyText1] from the overall
+  /// theme's [ThemeData.textTheme].
+  //
+  /// This only has an effect on widgets that respect the [DefaultTextStyle],
+  /// such as [Text].
   final TextStyle? avatarForegroundStyle;
+
+  /// The radii for each corner of the avatar's border.
   final BorderRadiusGeometry? avatarBorderRadius;
+
+  /// Defaults to [FlexiChipStyle.defaultAvatarSize].
   final Size avatarSize;
 
+  /// Color to be used for the icon's inside the chip.
   final Color? iconColor;
+
+  /// Opacity to be apply to [iconColor].
+  final double? iconOpacity;
+
+  /// The size of the icon's inside the chip, in logical pixels.
+  ///
+  /// Defaults to [FlexiChipStyle.defaultIconSize].
   final double iconSize;
-  final double iconOpacity;
 
   /// Creates a copy of this [FlexiChipStyle] but with
   /// the given fields replaced with the new values.
@@ -227,7 +286,7 @@ class FlexiChipStyle {
       avatarBorderRadius: avatarBorderRadius ?? this.avatarBorderRadius,
       clipBehavior: clipBehavior ?? this.clipBehavior,
       checkmarkColor: checkmarkColor ?? this.checkmarkColor,
-      checkmarkWidth: checkmarkWidth ?? this.checkmarkWidth,
+      checkmarkWeight: checkmarkWidth ?? this.checkmarkWeight,
       checkmarkSize: checkmarkSize ?? this.checkmarkSize,
       checkmarkStyle: checkmarkStyle ?? this.checkmarkStyle,
       iconColor: iconColor ?? this.iconColor,
@@ -263,7 +322,7 @@ class FlexiChipStyle {
       avatarBorderRadius: other.avatarBorderRadius,
       clipBehavior: other.clipBehavior,
       checkmarkColor: other.checkmarkColor,
-      checkmarkWidth: other.checkmarkWidth,
+      checkmarkWidth: other.checkmarkWeight,
       checkmarkSize: other.checkmarkSize,
       checkmarkStyle: other.checkmarkStyle,
       shadowColor: other.shadowColor,
@@ -284,8 +343,8 @@ abstract class MaterialStateFlexiChipStyle extends FlexiChipStyle
   /// from a [MaterialPropertyResolver<FlexiChipStyle>]
   /// callback function.
   ///
-  /// If used as a regular color, the color resolved in the default state (the
-  /// empty set of states) will be used.
+  /// If used as a regular FlexiChipStyle,
+  /// the FlexiChipStyle resolved in the default state will be used.
   ///
   /// The given callback parameter must return a non-null color in the default
   /// state.

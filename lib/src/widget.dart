@@ -37,52 +37,277 @@ class FlexiChip extends ImplicitlyAnimatedWidget {
           curve: curve,
         );
 
+  /// The primary content of the chip.
+  ///
+  /// Typically a [Text] widget.
   final Widget label;
 
+  /// Typically used as profile image.
+  ///
+  /// If the avatar is to have the user's initials, use [avatarText] instead.
   final ImageProvider? avatarImage;
 
+  /// The primary content of the chip avatar.
+  ///
+  /// Typically a [Text] widget.
   final Widget? avatarText;
 
+  /// A custom widget to display prior to the chip's [label].
   final Widget? leading;
 
+  /// A custom widget to display next to the chip's [label].
   final Widget? trailing;
 
+  /// Tooltip string to be used for the body area (where the label and avatar
+  /// are) of the chip.
   final String? tooltip;
 
+  /// The icon displayed when [onDeleted] is set.
+  ///
+  /// Defaults to an [Icon] widget set to use [Icons.cancel].
   final Widget? deleteIcon;
 
+  /// The message to be used for the chip's delete button tooltip.
+  ///
+  /// If provided with an empty string, the tooltip of the delete button will be
+  /// disabled.
+  ///
+  /// If null, the default [MaterialLocalizations.deleteButtonTooltip] will be
+  /// used.
   final String? deleteTooltip;
 
+  /// Whether or not this chip is selected.
+  ///
+  /// If [onSelected] is not null, this value will be used to determine if the
+  /// select checkmark will be shown or not.
+  ///
+  /// Must not be null. Defaults to false.
   final bool selected;
 
+  /// Whether or not this chip is disabled for input.
+  ///
+  /// Defaults to false. Cannot be null.
   final bool disabled;
 
+  /// Whether or not to show a checkmark when [selected] is true.
+  ///
+  /// Defaults to false. Cannot ve null.
   final bool checkmark;
 
+  /// True if this widget will be selected as the initial focus
+  /// when no other node in its scope is currently focused.
+  ///
+  /// Ideally, there is only one widget with autofocus set in each [FocusScope].
+  /// If there is more than one widget with autofocus set,
+  /// then the first one added to the tree will get focus.
+  ///
+  /// Must not be null. Defaults to false.
   final bool autofocus;
 
+  /// An optional focus node to use as the focus node for this widget.
+  ///
+  /// If one is not supplied, then one will be automatically allocated, owned,
+  /// and managed by this widget. The widget will be focusable even if a [focusNode] is not supplied.
+  /// If supplied, the given focusNode will be hosted by this widget, but not owned.
+  /// See [FocusNode] for more information on what being hosted and/or owned implies.
+  ///
+  /// Supplying a focus node is sometimes useful if an ancestor
+  /// to this widget wants to control when this widget has the focus.
+  /// The owner will be responsible for calling [FocusNode.dispose]
+  /// on the focus node when it is done with it, but this widget
+  /// will attach/detach and reparent the node when needed.
   final FocusNode? focusNode;
 
+  /// The splash color of the ink response. If this property is null then the
+  /// splash color of the theme, [ThemeData.splashColor], will be used.
+  ///
+  /// See also:
+  ///
+  ///  * [splashFactory], which defines the appearance of the splash.
+  ///  * [radius], the (maximum) size of the ink splash.
+  ///  * [highlightColor], the color of the highlight.
   final Color? splashColor;
 
+  /// Defines the appearance of the splash.
+  ///
+  /// Defaults to the value of the theme's splash factory: [ThemeData.splashFactory].
+  ///
+  /// See also:
+  ///
+  ///  * [radius], the (maximum) size of the ink splash.
+  ///  * [splashColor], the color of the splash.
+  ///  * [highlightColor], the color of the highlight.
+  ///  * [InkSplash.splashFactory], which defines the default splash.
+  ///  * [InkRipple.splashFactory], which defines a splash that spreads out
+  ///    more aggressively than the default.
   final InteractiveInkFeatureFactory? splashFactory;
 
+  /// Called when the user taps the chip.
+  ///
+  /// If [onPressed] is set, then this callback will be called when the user
+  /// taps on the label or avatar parts of the chip. If [onPressed] is null,
+  /// then the chip will be disabled.
+  ///
+  /// {@tool snippet}
+  ///
+  /// ```dart
+  /// class Blacksmith extends StatelessWidget {
+  ///   const Blacksmith({Key? key}) : super(key: key);
+  ///
+  ///   void startHammering() {
+  ///     print('bang bang bang');
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return FlexiChip(
+  ///       label: const Text('Apply Hammer'),
+  ///       onPressed: startHammering,
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
   final VoidCallback? onPressed;
 
+  /// Called when the user taps the [deleteIcon] to delete the chip.
+  ///
+  /// If null, the delete button will not appear on the chip.
+  ///
+  /// The chip will not automatically remove itself: this just tells the app
+  /// that the user tapped the delete button.
   final VoidCallback? onDeleted;
 
+  /// Called when the chip should change between selected and de-selected
+  /// states.
+  ///
+  /// When the chip is tapped, then the [onSelected] callback, if set, will be
+  /// applied to `!selected` (see [selected]).
+  ///
+  /// The chip passes the new value to the callback but does not actually
+  /// change state until the parent widget rebuilds the chip with the new
+  /// value.
+  ///
+  /// The callback provided to [onSelected] should update the state of the
+  /// parent [StatefulWidget] using the [State.setState] method, so that the
+  /// parent gets rebuilt.
+  ///
+  /// The [onSelected] and [onPressed] callbacks must not
+  /// both be specified at the same time.
+  ///
+  /// {@tool snippet}
+  ///
+  /// A [StatefulWidget] that illustrates use of onSelected in an [InputChip].
+  ///
+  /// ```dart
+  /// class Wood extends StatefulWidget {
+  ///   const Wood({Key? key}) : super(key: key);
+  ///
+  ///   @override
+  ///   State<StatefulWidget> createState() => WoodState();
+  /// }
+  ///
+  /// class WoodState extends State<Wood> {
+  ///   bool _useChisel = false;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return FlexiChip(
+  ///       label: const Text('Use Chisel'),
+  ///       selected: _useChisel,
+  ///       onSelected: (bool newValue) {
+  ///         setState(() {
+  ///           _useChisel = newValue;
+  ///         });
+  ///       },
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
   final ValueChanged<bool>? onSelected;
 
+  /// The style to be applied to the chip's.
+  ///
+  /// If [style] is a [MaterialStateFlexiChipStyle],
+  /// then [MaterialStateProperty.resolve] is used
+  /// for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.pressed].
   final FlexiChipStyle? style;
 
+  /// The style to be merged with [style],
+  /// when states includes [MaterialState.selected]
+  ///
+  /// If [style] is a [MaterialStateFlexiChipStyle],
+  /// then [MaterialStateProperty.resolve] is used
+  /// for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.pressed].
   final FlexiChipStyle? selectedStyle;
 
+  /// The style to be merged with [style],
+  /// when states includes [MaterialState.disabled]
+  ///
+  /// If [style] is a [MaterialStateFlexiChipStyle],
+  /// then [MaterialStateProperty.resolve] is used
+  /// for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.pressed].
   final FlexiChipStyle? disabledStyle;
 
+  /// The style to be merged with [style],
+  /// when states includes [MaterialState.hovered]
+  ///
+  /// If [style] is a [MaterialStateFlexiChipStyle],
+  /// then [MaterialStateProperty.resolve] is used
+  /// for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.pressed].
   final FlexiChipStyle? hoveredStyle;
 
+  /// The style to be merged with [style],
+  /// when states includes [MaterialState.focused]
+  ///
+  /// If [style] is a [MaterialStateFlexiChipStyle],
+  /// then [MaterialStateProperty.resolve] is used
+  /// for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.pressed].
   final FlexiChipStyle? focusedStyle;
 
+  /// The style to be merged with [style],
+  /// when states includes [MaterialState.pressed]
+  ///
+  /// If [style] is a [MaterialStateFlexiChipStyle],
+  /// then [MaterialStateProperty.resolve] is used
+  /// for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.disabled].
+  ///  * [MaterialState.selected].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.pressed].
   final FlexiChipStyle? pressedStyle;
 
   static const defaultDuration = Duration(milliseconds: 200);
@@ -90,7 +315,8 @@ class FlexiChip extends ImplicitlyAnimatedWidget {
   bool get enabled => !disabled;
 
   bool get canTap {
-    return enabled && (onPressed != null || onSelected != null);
+    return enabled &&
+        (onPressed != null || onSelected != null || onDeleted != null);
   }
 
   @override
@@ -168,6 +394,10 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
     return widget.disabled
         ? color.withAlpha(FlexiChipStyle.disabledForegroundAlpha)
         : color;
+  }
+
+  Clip get containerClipBehavior {
+    return style.clipBehavior ?? FlexiChipStyle.defaultClipBehavior;
   }
 
   EdgeInsetsGeometry get containerPadding {
@@ -365,9 +595,9 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
     return _checkmarkSizeTween?.evaluate(animation) ?? style.checkmarkSize;
   }
 
-  Tween<double>? _checkmarkWidthTween;
-  double get animatedCheckmarkWidth {
-    return _checkmarkWidthTween?.evaluate(animation) ?? style.checkmarkWidth;
+  Tween<double>? _checkmarkWeightTween;
+  double get animatedCheckmarkWeight {
+    return _checkmarkWeightTween?.evaluate(animation) ?? style.checkmarkWeight;
   }
 
   ColorTween? _iconColorTween;
@@ -381,8 +611,8 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
   }
 
   Tween<double>? _iconOpacityTween;
-  double get animatedIconOpacity {
-    return _iconOpacityTween?.evaluate(animation) ?? style.iconOpacity;
+  double? get animatedIconOpacity {
+    return _iconOpacityTween?.evaluate(animation);
   }
 
   bool get hasCheckmark => widget.checkmark && animatedCheckmarkProgress > 0;
@@ -421,7 +651,7 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
         ? Checkmark(
             progress: animatedCheckmarkProgress,
             size: Size.square(animatedCheckmarkSize),
-            weight: animatedCheckmarkWidth,
+            weight: animatedCheckmarkWeight,
             color: animatedCheckmarkColor,
             style: style.checkmarkStyle,
           )
@@ -600,9 +830,9 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
       (value) => Tween<double>(begin: value),
     ) as Tween<double>?;
 
-    _checkmarkWidthTween = visitor(
-      _checkmarkWidthTween,
-      style.checkmarkWidth,
+    _checkmarkWeightTween = visitor(
+      _checkmarkWeightTween,
+      style.checkmarkWeight,
       (value) => Tween<double>(begin: value),
     ) as Tween<double>?;
 
@@ -656,7 +886,7 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
         message: widget.tooltip,
         enabled: widget.canTap,
         child: _ChipContainer(
-          clipBehavior: style.clipBehavior,
+          clipBehavior: containerClipBehavior,
           borderRadius: animatedContainerRadius,
           decoration: animatedContainerDecoration,
           shape: animatedContainerBorder,
