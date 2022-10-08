@@ -7,6 +7,36 @@ class FlexiChipStyle {
     this.padding,
     this.clipBehavior,
     this.shadowColor,
+    this.elevation,
+    this.foregroundStyle,
+    this.foregroundColor,
+    this.foregroundSpacing,
+    this.backgroundColor,
+    this.backgroundOpacity,
+    this.borderColor,
+    this.borderOpacity,
+    this.borderWidth,
+    this.borderRadius,
+    this.borderStyle,
+    this.avatarSize,
+    this.avatarForegroundStyle,
+    this.avatarForegroundColor,
+    this.avatarBackgroundColor,
+    this.avatarBorderRadius,
+    this.checkmarkColor,
+    this.checkmarkSize,
+    this.checkmarkWeight,
+    this.checkmarkStyle,
+    this.iconColor,
+    this.iconOpacity,
+    this.iconSize,
+  });
+
+  const FlexiChipStyle.toned({
+    this.margin,
+    this.padding,
+    this.clipBehavior,
+    this.shadowColor,
     this.elevation = 0,
     this.foregroundStyle,
     this.foregroundColor,
@@ -34,13 +64,13 @@ class FlexiChipStyle {
 
   /// Chip style with an outlined border and no fill color.
   const FlexiChipStyle.outlined({
+    Color? color,
+    double spacing = FlexiChipStyle.defaultForegroundSpacing,
     this.margin,
     this.padding,
     this.clipBehavior,
     this.shadowColor,
     this.elevation = 0,
-    double spacing = FlexiChipStyle.defaultForegroundSpacing,
-    Color? color,
     this.borderOpacity = 1,
     this.borderWidth = 1,
     this.borderRadius = FlexiChipStyle.defaultBorderRadius,
@@ -66,12 +96,12 @@ class FlexiChipStyle {
 
   /// Chip style with fill color whose material elevates when pressed.
   const FlexiChipStyle.elevated({
+    Color? color,
     this.margin,
     this.padding,
     this.clipBehavior,
     this.shadowColor,
     this.elevation = 0,
-    Color? color,
     this.foregroundStyle,
     this.foregroundColor = const Color(0xFFFFFFFF),
     this.foregroundSpacing = FlexiChipStyle.defaultForegroundSpacing,
@@ -106,6 +136,8 @@ class FlexiChipStyle {
   static const defaultColor = Color(0xDD000000);
   static const defaultShadowColor = Color(0xFF000000);
   static const defaultClipBehavior = Clip.antiAlias;
+  static const defaultBorderWidth = 1.0;
+  static const defaultBorderStyle = BorderStyle.solid;
   static const defaultBorderRadius = BorderRadius.all(Radius.circular(8));
   static const defaultPadding = EdgeInsets.symmetric(horizontal: 8);
   static const defaultPaddingWithAvatar = EdgeInsets.symmetric(horizontal: 4);
@@ -127,10 +159,10 @@ class FlexiChipStyle {
   /// Stroke width of the checkmark.
   ///
   /// Defaults to [FlexiChipStyle.defaultCheckmarkWeight].
-  final double checkmarkWeight;
+  final double? checkmarkWeight;
 
   /// Defaults to [FlexiChipStyle.defaultCheckmarkSize].
-  final double checkmarkSize;
+  final double? checkmarkSize;
 
   /// Defaults to [CheckmarkStyle.sharp].
   final CheckmarkStyle? checkmarkStyle;
@@ -157,7 +189,7 @@ class FlexiChipStyle {
   /// The chip's z-coordinate relative to the parent at which to place this physical object.
   ///
   /// The value is non-negative.
-  final double elevation;
+  final double? elevation;
 
   /// The style to be applied to the chip's label.
   ///
@@ -172,31 +204,31 @@ class FlexiChipStyle {
   final Color? foregroundColor;
 
   /// How much space to place between chip's foreground widget in a run in the main axis.
-  final double foregroundSpacing;
+  final double? foregroundSpacing;
 
   /// Color to be used for the chip's background.
   final Color? backgroundColor;
 
   /// Opacity to be apply to [backgroundColor].
-  final double backgroundOpacity;
+  final double? backgroundOpacity;
 
   /// Color to be used for the chip's border.
   final Color? borderColor;
 
   /// Opacity to be apply to [borderColor].
-  final double borderOpacity;
+  final double? borderOpacity;
 
   /// The width of this side of the chip's border, in logical pixels.
-  final double borderWidth;
+  final double? borderWidth;
 
   /// The radii for each corner of the chip's border.
-  final BorderRadiusGeometry borderRadius;
+  final BorderRadiusGeometry? borderRadius;
 
   /// The style of this side of the chip's border.
   ///
   /// To omit a side, set [style] to [BorderStyle.none].
   /// This skips painting the border, but the border still has a [weight].
-  final BorderStyle borderStyle;
+  final BorderStyle? borderStyle;
 
   /// Color to be used for the avatar's background.
   final Color? avatarBackgroundColor;
@@ -217,7 +249,7 @@ class FlexiChipStyle {
   final BorderRadiusGeometry? avatarBorderRadius;
 
   /// Defaults to [FlexiChipStyle.defaultAvatarSize].
-  final Size avatarSize;
+  final Size? avatarSize;
 
   /// Color to be used for the icon's inside the chip.
   final Color? iconColor;
@@ -228,7 +260,7 @@ class FlexiChipStyle {
   /// The size of the icon's inside the chip, in logical pixels.
   ///
   /// Defaults to [FlexiChipStyle.defaultIconSize].
-  final double iconSize;
+  final double? iconSize;
 
   /// Creates a copy of this [FlexiChipStyle] but with
   /// the given fields replaced with the new values.

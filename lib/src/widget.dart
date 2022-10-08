@@ -13,7 +13,7 @@ class FlexiChip extends ImplicitlyAnimatedWidget {
     this.tooltip,
     this.deleteIcon,
     this.deleteTooltip,
-    this.style,
+    this.style = const FlexiChipStyle.toned(),
     this.selectedStyle,
     this.disabledStyle,
     this.hoveredStyle,
@@ -375,7 +375,9 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
 
   Color get backgroundColor {
     final color = style.backgroundColor ?? defaultColor;
-    final withOpacity = color.withOpacity(style.backgroundOpacity);
+    final withOpacity = style.backgroundOpacity != null
+        ? color.withOpacity(style.backgroundOpacity!)
+        : color;
     return widget.disabled
         ? withOpacity.withAlpha(FlexiChipStyle.disabledBackgroundAlpha)
         : withOpacity;
@@ -383,7 +385,9 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
 
   Color get borderColor {
     final color = style.borderColor ?? defaultColor;
-    final withOpacity = color.withOpacity(style.borderOpacity);
+    final withOpacity = style.borderOpacity != null
+        ? color.withOpacity(style.borderOpacity!)
+        : color;
     return widget.disabled
         ? withOpacity.withAlpha(FlexiChipStyle.disabledBorderAlpha)
         : withOpacity;
@@ -414,16 +418,16 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
   }
 
   BorderRadiusGeometry get containerRadius {
-    return style.borderRadius;
+    return style.borderRadius ?? FlexiChipStyle.defaultBorderRadius;
   }
 
   ShapeBorder get containerBorder {
     return RoundedRectangleBorder(
-      borderRadius: style.borderRadius,
+      borderRadius: containerRadius,
       side: BorderSide(
         color: borderColor,
-        width: style.borderWidth,
-        style: style.borderStyle,
+        width: style.borderWidth ?? FlexiChipStyle.defaultBorderWidth,
+        style: style.borderStyle ?? FlexiChipStyle.defaultBorderStyle,
       ),
     );
   }
@@ -433,8 +437,8 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
       color: backgroundColor,
       border: Border.all(
         color: borderColor,
-        width: style.borderWidth,
-        style: style.borderStyle,
+        width: style.borderWidth ?? FlexiChipStyle.defaultBorderWidth,
+        style: style.borderStyle ?? FlexiChipStyle.defaultBorderStyle,
       ),
       borderRadius: style.borderRadius,
     );
@@ -543,9 +547,20 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
         containerDecoration;
   }
 
+  EdgeInsetsGeometryTween? _containerPaddingTween;
+  EdgeInsetsGeometry get animatedContainerPadding {
+    return _containerPaddingTween?.evaluate(animation) ?? containerPadding;
+  }
+
   ColorTween? _foregroundColorTween;
   Color? get animatedForegroundColor {
     return _foregroundColorTween?.evaluate(animation);
+  }
+
+  Tween<double>? _foregroundSpacingTween;
+  double get animatedForegroundSpacing {
+    return _foregroundSpacingTween?.evaluate(animation) ??
+        FlexiChipStyle.defaultForegroundSpacing;
   }
 
   TextStyleTween? _foregroundStyleTween;
@@ -577,7 +592,8 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
 
   SizeTween? _avatarSizeTween;
   Size get animatedAvatarSize {
-    return _avatarSizeTween?.evaluate(animation) ?? style.avatarSize;
+    return _avatarSizeTween?.evaluate(animation) ??
+        FlexiChipStyle.defaultAvatarSize;
   }
 
   ColorTween? _checkmarkColorTween;
@@ -592,12 +608,14 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
 
   Tween<double>? _checkmarkSizeTween;
   double get animatedCheckmarkSize {
-    return _checkmarkSizeTween?.evaluate(animation) ?? style.checkmarkSize;
+    return _checkmarkSizeTween?.evaluate(animation) ??
+        FlexiChipStyle.defaultCheckmarkSize;
   }
 
   Tween<double>? _checkmarkWeightTween;
   double get animatedCheckmarkWeight {
-    return _checkmarkWeightTween?.evaluate(animation) ?? style.checkmarkWeight;
+    return _checkmarkWeightTween?.evaluate(animation) ??
+        FlexiChipStyle.defaultCheckmarkWeight;
   }
 
   ColorTween? _iconColorTween;
@@ -607,7 +625,8 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
 
   Tween<double>? _iconSizeTween;
   double get animatedIconSize {
-    return _iconSizeTween?.evaluate(animation) ?? style.iconSize;
+    return _iconSizeTween?.evaluate(animation) ??
+        FlexiChipStyle.defaultIconSize;
   }
 
   Tween<double>? _iconOpacityTween;
@@ -746,6 +765,12 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
       (value) => BorderRadiusTween(begin: value),
     ) as BorderRadiusTween?;
 
+    _containerPaddingTween = visitor(
+      _containerPaddingTween,
+      containerPadding,
+      (value) => EdgeInsetsGeometryTween(begin: value),
+    ) as EdgeInsetsGeometryTween?;
+
     _containerBorderTween = visitor(
       _containerBorderTween,
       containerBorder,
@@ -760,13 +785,13 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
 
     _containerShadowColorTween = visitor(
       _containerShadowColorTween,
-      style.shadowColor,
+      style.shadowColor ?? FlexiChipStyle.defaultShadowColor,
       (value) => ColorTween(begin: value),
     ) as ColorTween?;
 
     _containerElevationTween = visitor(
       _containerElevationTween,
-      style.elevation,
+      style.elevation ?? 0.0,
       (value) => Tween<double>(begin: value),
     ) as Tween<double>;
 
@@ -775,6 +800,12 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
       foregroundColor,
       (value) => ColorTween(begin: value),
     ) as ColorTween?;
+
+    _foregroundSpacingTween = visitor(
+      _foregroundSpacingTween,
+      style.foregroundSpacing ?? FlexiChipStyle.defaultForegroundSpacing,
+      (value) => Tween<double>(begin: value),
+    ) as Tween<double>?;
 
     _foregroundStyleTween = visitor(
       _foregroundStyleTween,
@@ -808,7 +839,7 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
 
     _avatarSizeTween = visitor(
       _avatarSizeTween,
-      style.avatarSize,
+      style.avatarSize ?? FlexiChipStyle.defaultAvatarSize,
       (value) => SizeTween(begin: value),
     ) as SizeTween?;
 
@@ -826,13 +857,13 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
 
     _checkmarkSizeTween = visitor(
       _checkmarkSizeTween,
-      style.checkmarkSize,
+      style.checkmarkSize ?? FlexiChipStyle.defaultCheckmarkSize,
       (value) => Tween<double>(begin: value),
     ) as Tween<double>?;
 
     _checkmarkWeightTween = visitor(
       _checkmarkWeightTween,
-      style.checkmarkWeight,
+      style.checkmarkWeight ?? FlexiChipStyle.defaultCheckmarkWeight,
       (value) => Tween<double>(begin: value),
     ) as Tween<double>?;
 
@@ -844,7 +875,7 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
 
     _iconSizeTween = visitor(
       _iconSizeTween,
-      style.iconSize,
+      style.iconSize ?? FlexiChipStyle.defaultIconSize,
       (value) => Tween<double>(begin: value),
     ) as Tween<double>?;
 
@@ -910,8 +941,8 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
                 size: animatedIconSize,
                 opacity: animatedIconOpacity,
               ),
-              padding: containerPadding,
-              spacing: style.foregroundSpacing,
+              padding: animatedContainerPadding,
+              spacing: animatedForegroundSpacing,
               label: label,
               leading: leading,
               trailing: trailing,
