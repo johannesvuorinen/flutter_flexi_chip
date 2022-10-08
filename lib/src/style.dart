@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:animated_checkmark/animated_checkmark.dart';
 
 class FlexiChipStyle {
   const FlexiChipStyle({
@@ -25,6 +26,7 @@ class FlexiChipStyle {
     this.checkmarkColor,
     this.checkmarkSize = FlexiChipStyle.defaultCheckmarkSize,
     this.checkmarkWidth = FlexiChipStyle.defaultCheckmarkWidth,
+    this.checkmarkStyle,
     this.iconColor,
     this.iconSize = FlexiChipStyle.defaultIconSize,
     this.iconOpacity = 1,
@@ -50,6 +52,7 @@ class FlexiChipStyle {
     this.checkmarkColor,
     this.checkmarkSize = FlexiChipStyle.defaultCheckmarkSize,
     this.checkmarkWidth = FlexiChipStyle.defaultCheckmarkWidth,
+    this.checkmarkStyle,
     this.iconColor,
     this.iconSize = FlexiChipStyle.defaultIconSize,
     this.iconOpacity = 1,
@@ -81,6 +84,7 @@ class FlexiChipStyle {
     this.checkmarkColor,
     this.checkmarkSize = FlexiChipStyle.defaultCheckmarkSize,
     this.checkmarkWidth = FlexiChipStyle.defaultCheckmarkWidth,
+    this.checkmarkStyle,
     this.iconColor,
     this.iconSize = FlexiChipStyle.defaultIconSize,
     this.iconOpacity = 1,
@@ -122,6 +126,7 @@ class FlexiChipStyle {
   final Color? checkmarkColor;
   final double checkmarkWidth;
   final double checkmarkSize;
+  final CheckmarkStyle? checkmarkStyle;
 
   final EdgeInsetsGeometry? margin;
   final EdgeInsetsGeometry? padding;
@@ -153,7 +158,7 @@ class FlexiChipStyle {
   /// The style of this side of the border.
   ///
   /// To omit a side, set [style] to [BorderStyle.none].
-  /// This skips painting the border, but the border still has a [width].
+  /// This skips painting the border, but the border still has a [weight].
   final BorderStyle borderStyle;
 
   final Color? avatarBackgroundColor;
@@ -192,6 +197,7 @@ class FlexiChipStyle {
     Color? checkmarkColor,
     double? checkmarkWidth,
     double? checkmarkSize,
+    CheckmarkStyle? checkmarkStyle,
     Color? iconColor,
     double? iconSize,
     double? iconOpacity,
@@ -223,6 +229,7 @@ class FlexiChipStyle {
       checkmarkColor: checkmarkColor ?? this.checkmarkColor,
       checkmarkWidth: checkmarkWidth ?? this.checkmarkWidth,
       checkmarkSize: checkmarkSize ?? this.checkmarkSize,
+      checkmarkStyle: checkmarkStyle ?? this.checkmarkStyle,
       iconColor: iconColor ?? this.iconColor,
       iconSize: iconSize ?? this.iconSize,
       iconOpacity: iconOpacity ?? this.iconOpacity,
@@ -258,6 +265,7 @@ class FlexiChipStyle {
       checkmarkColor: other.checkmarkColor,
       checkmarkWidth: other.checkmarkWidth,
       checkmarkSize: other.checkmarkSize,
+      checkmarkStyle: other.checkmarkStyle,
       shadowColor: other.shadowColor,
       iconColor: other.iconColor,
       iconSize: other.iconSize,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:animated_checkmark/animated_checkmark.dart';
 import './style.dart';
-import './checkmark.dart';
 
 class FlexiChip extends ImplicitlyAnimatedWidget {
   const FlexiChip({
@@ -126,7 +126,9 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
 
   Color get defaultColor {
     return widget.selected
-        ? (appTheme.colorScheme.primary)
+        ? appTheme.brightness == Brightness.light
+            ? appTheme.colorScheme.primary
+            : appTheme.colorScheme.inversePrimary
         : (defaultTheme.backgroundColor ??
             chipTheme.backgroundColor ??
             appTheme.chipTheme.backgroundColor ??
@@ -134,11 +136,15 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
   }
 
   Color get defaultForegroundColor {
+    final brightness = appTheme.brightness;
+    final colorByBrightness = brightness == Brightness.light
+        ? FlexiChipStyle.defaultColor
+        : Colors.white;
     return widget.selected
-        ? (appTheme.colorScheme.primary)
+        ? appTheme.colorScheme.primary
         : (chipTheme.labelStyle?.color ??
             appTheme.chipTheme.labelStyle?.color ??
-            FlexiChipStyle.defaultColor);
+            colorByBrightness);
   }
 
   Color get backgroundColor {
@@ -213,26 +219,31 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
         .merge(style.foregroundStyle);
   }
 
+  Color get avatarBackgroundColor {
+    return style.avatarBackgroundColor ?? borderColor;
+  }
+
+  Color? _estimateSurfaceColor(Color? background, Color inLight, Color inDark) {
+    if (background == null) return null;
+    final brightness = ThemeData.estimateBrightnessForColor(background);
+    return brightness == Brightness.dark ? inDark : inLight;
+  }
+
   Color get avatarForegroundColor {
-    final brightness = ThemeData.estimateBrightnessForColor(
-      style.avatarBackgroundColor ?? backgroundColor,
-    );
-    final colorByBrightness =
-        brightness == Brightness.dark ? Colors.white : Colors.black87;
-    return style.avatarForegroundColor ?? colorByBrightness;
+    return style.avatarForegroundColor ??
+        _estimateSurfaceColor(
+          avatarBackgroundColor,
+          Colors.black87,
+          Colors.white,
+        ) ??
+        foregroundColor;
   }
 
   TextStyle get avatarForegroundStyle {
     return const TextStyle(
       height: 1,
       fontSize: 12,
-    )
-        .copyWith(
-          color: avatarForegroundColor,
-        )
-        .merge(
-          style.avatarForegroundStyle,
-        );
+    ).copyWith(color: avatarForegroundColor).merge(style.avatarForegroundStyle);
   }
 
   ShapeBorder get avatarBorder {
@@ -249,7 +260,7 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
 
   BoxDecoration get avatarDecoration {
     return BoxDecoration(
-      color: style.avatarBackgroundColor,
+      color: avatarBackgroundColor,
       image: widget.avatarImage != null
           ? DecorationImage(
               image: widget.avatarImage!,
@@ -407,11 +418,12 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
 
   Widget? get checkmark {
     return hasCheckmark
-        ? FlexiCheckmark(
+        ? Checkmark(
             progress: animatedCheckmarkProgress,
-            size: animatedCheckmarkSize,
-            width: animatedCheckmarkWidth,
+            size: Size.square(animatedCheckmarkSize),
+            weight: animatedCheckmarkWidth,
             color: animatedCheckmarkColor,
+            style: style.checkmarkStyle,
           )
         : null;
   }
@@ -450,26 +462,38 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
     setMaterialState(MaterialState.focused, value);
   }
 
+  setTheme() {
+    setState(() {
+      appTheme = Theme.of(context);
+      chipTheme = ChipTheme.of(context);
+      brightness = chipTheme.brightness ?? appTheme.brightness;
+      defaultTheme = ChipThemeData.fromDefaults(
+        brightness: brightness,
+        secondaryColor: brightness == Brightness.dark
+            ? Colors.tealAccent[200]!
+            : appTheme.primaryColor,
+        labelStyle: const TextStyle().merge(appTheme.textTheme.bodyText1),
+      );
+    });
+  }
+
   @override
   void initState() {
     setMaterialState(MaterialState.disabled, widget.disabled);
     setMaterialState(MaterialState.selected, widget.selected);
     setStyle();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {
-        appTheme = Theme.of(context);
-        chipTheme = ChipTheme.of(context);
-        brightness = chipTheme.brightness ?? appTheme.brightness;
-        defaultTheme = ChipThemeData.fromDefaults(
-          brightness: brightness,
-          secondaryColor: brightness == Brightness.dark
-              ? Colors.tealAccent[200]!
-              : appTheme.primaryColor,
-          labelStyle: const TextStyle().merge(appTheme.textTheme.bodyText1),
-        );
-      });
+      setTheme();
     });
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    setTheme();
+    setStyle();
+    super.didChangeDependencies();
+    didUpdateWidget(widget);
   }
 
   @override
@@ -907,8 +931,7 @@ class FlexiChipButton extends StatelessWidget {
       container: true,
       button: true,
       child: _Tooltip(
-        message:
-            tooltip ?? MaterialLocalizations.of(context).deleteButtonTooltip,
+        message: tooltip,
         enabled: enabled,
         child: InkWell(
           // Radius should be slightly less than the full size of the chip.
