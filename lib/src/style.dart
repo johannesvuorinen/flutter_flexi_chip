@@ -1,20 +1,29 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:widget_event/widget_event.dart';
 import 'package:animated_checkmark/animated_checkmark.dart';
+import 'event.dart';
 
+/// Default chip's style.
 class FlexiChipStyle {
   const FlexiChipStyle({
+    this.height,
     this.margin,
     this.padding,
     this.clipBehavior,
+    this.overlayColor,
     this.shadowColor,
     this.elevation,
     this.foregroundStyle,
     this.foregroundColor,
+    this.foregroundOpacity,
+    this.foregroundAlpha,
     this.foregroundSpacing,
     this.backgroundColor,
     this.backgroundOpacity,
+    this.backgroundAlpha,
     this.borderColor,
     this.borderOpacity,
+    this.borderAlpha,
     this.borderWidth,
     this.borderRadius,
     this.borderStyle,
@@ -32,109 +41,416 @@ class FlexiChipStyle {
     this.iconSize,
   });
 
-  const FlexiChipStyle.toned({
-    this.margin,
-    this.padding,
-    this.clipBehavior,
-    this.shadowColor,
-    this.elevation = 0,
-    this.foregroundStyle,
-    this.foregroundColor,
-    this.foregroundSpacing = FlexiChipStyle.defaultForegroundSpacing,
-    this.backgroundColor,
-    this.backgroundOpacity = .12,
-    this.borderColor,
-    this.borderOpacity = 1,
-    this.borderWidth = 1,
-    this.borderRadius = FlexiChipStyle.defaultBorderRadius,
-    this.borderStyle = BorderStyle.none,
-    this.avatarSize = FlexiChipStyle.defaultAvatarSize,
-    this.avatarForegroundStyle,
-    this.avatarForegroundColor,
-    this.avatarBackgroundColor,
-    this.avatarBorderRadius,
-    this.checkmarkColor,
-    this.checkmarkSize = FlexiChipStyle.defaultCheckmarkSize,
-    this.checkmarkWeight = FlexiChipStyle.defaultCheckmarkWeight,
-    this.checkmarkStyle,
-    this.iconColor,
-    this.iconOpacity,
-    this.iconSize = FlexiChipStyle.defaultIconSize,
-  });
+  /// Create a chip's style from another style
+  FlexiChipStyle.from(FlexiChipStyle? other)
+      : height = other?.height,
+        margin = other?.margin,
+        padding = other?.padding,
+        clipBehavior = other?.clipBehavior,
+        overlayColor = other?.overlayColor,
+        shadowColor = other?.shadowColor,
+        elevation = other?.elevation,
+        foregroundStyle = other?.foregroundStyle,
+        foregroundColor = other?.foregroundColor,
+        foregroundOpacity = other?.foregroundOpacity,
+        foregroundAlpha = other?.foregroundAlpha,
+        foregroundSpacing = other?.foregroundSpacing,
+        backgroundColor = other?.backgroundColor,
+        backgroundOpacity = other?.backgroundOpacity,
+        backgroundAlpha = other?.backgroundAlpha,
+        borderColor = other?.borderColor,
+        borderOpacity = other?.borderOpacity,
+        borderAlpha = other?.borderAlpha,
+        borderWidth = other?.borderWidth,
+        borderRadius = other?.borderRadius,
+        borderStyle = other?.borderStyle,
+        avatarSize = other?.avatarSize,
+        avatarForegroundStyle = other?.avatarForegroundStyle,
+        avatarForegroundColor = other?.avatarForegroundColor,
+        avatarBackgroundColor = other?.avatarBackgroundColor,
+        avatarBorderRadius = other?.avatarBorderRadius,
+        checkmarkColor = other?.checkmarkColor,
+        checkmarkSize = other?.checkmarkSize,
+        checkmarkWeight = other?.checkmarkWeight,
+        checkmarkStyle = other?.checkmarkStyle,
+        iconColor = other?.iconColor,
+        iconOpacity = other?.iconOpacity,
+        iconSize = other?.iconSize;
 
-  /// Chip style with an outlined border and no fill color.
-  const FlexiChipStyle.outlined({
+  /// Create an event driven chip's style using [callback].
+  factory FlexiChipStyle.driven(
+    DrivenPropertyResolver<FlexiChipStyle?> callback,
+  ) {
+    return _DrivenFlexiChipStyle.by(callback);
+  }
+
+  /// Create a chip's style for each event.
+  ///
+  /// The [enabled] is base style to be applied to the chip.
+  /// if [null] will fallback with empty FlexiChipStyle
+  ///
+  /// The [selected] is style to be merged with [enabled],
+  /// when events includes [FlexiChipEvent.selected].
+  ///
+  /// The [disabled] style to be merged with [enabled],
+  /// when events includes [FlexiChipEvent.disabled].
+  ///
+  /// The [hovered] style to be merged with [enabled],
+  /// when events includes [FlexiChipEvent.hovered].
+  ///
+  /// The [focused] style to be merged with [enabled],
+  /// when events includes [FlexiChipEvent.focused].
+  ///
+  /// The [pressed] style to be merged with [enabled],
+  /// when events includes [FlexiChipEvent.pressed].
+  factory FlexiChipStyle.onEvent({
+    FlexiChipStyle? enabled,
+    FlexiChipStyle? selected,
+    FlexiChipStyle? disabled,
+    FlexiChipStyle? hovered,
+    FlexiChipStyle? focused,
+    FlexiChipStyle? pressed,
+  }) {
+    return FlexiChipStyle.driven((events) {
+      return (enabled ?? const FlexiChipStyle())
+          .merge(FlexiChipEvent.isSelected(events)
+              ? evaluate(selected, events)
+              : null)
+          .merge(FlexiChipEvent.isDisabled(events)
+              ? evaluate(disabled, events)
+              : null)
+          .merge(FlexiChipEvent.isHovered(events)
+              ? evaluate(hovered, events)
+              : null)
+          .merge(FlexiChipEvent.isFocused(events)
+              ? evaluate(focused, events)
+              : null)
+          .merge(FlexiChipEvent.isPressed(events)
+              ? evaluate(pressed, events)
+              : null);
+    });
+  }
+
+  /// Create chip's style with default value for toned style.
+  ///
+  /// The [selectedStyle] is style to be merged,
+  /// when events includes [FlexiChipEvent.selected].
+  ///
+  /// The [disabledStyle] style to be merged,
+  /// when events includes [FlexiChipEvent.disabled].
+  ///
+  /// The [hoveredStyle] style to be merged,
+  /// when events includes [FlexiChipEvent.hovered].
+  ///
+  /// The [focusedStyle] style to be merged,
+  /// when events includes [FlexiChipEvent.focused].
+  ///
+  /// The [pressedStyle] style to be merged,
+  /// when events includes [FlexiChipEvent.pressed].
+  factory FlexiChipStyle.toned({
+    double? height,
+    EdgeInsetsGeometry? margin,
+    EdgeInsetsGeometry? padding,
+    Clip? clipBehavior,
+    Color? overlayColor,
+    Color? shadowColor,
+    double? elevation,
+    TextStyle? foregroundStyle,
+    Color? foregroundColor,
+    double? foregroundOpacity,
+    int? foregroundAlpha,
+    double? foregroundSpacing,
+    Color? backgroundColor,
+    double? backgroundOpacity = .12,
+    int? backgroundAlpha,
+    Color? borderColor,
+    double? borderOpacity = 1,
+    int? borderAlpha,
+    double? borderWidth = 1,
+    BorderRadiusGeometry? borderRadius,
+    BorderStyle? borderStyle = BorderStyle.none,
+    Size? avatarSize,
+    TextStyle? avatarForegroundStyle,
+    Color? avatarForegroundColor,
+    Color? avatarBackgroundColor,
+    BorderRadiusGeometry? avatarBorderRadius,
+    Color? checkmarkColor,
+    double? checkmarkSize,
+    double? checkmarkWeight,
+    CheckmarkStyle? checkmarkStyle,
+    Color? iconColor,
+    double? iconOpacity,
+    double? iconSize,
+    FlexiChipStyle? selectedStyle,
+    FlexiChipStyle? disabledStyle = const FlexiChipStyle(
+      foregroundAlpha: FlexiChipStyle.disabledForegroundAlpha,
+      backgroundAlpha: FlexiChipStyle.disabledBackgroundAlpha,
+      borderAlpha: FlexiChipStyle.disabledBorderAlpha,
+    ),
+    FlexiChipStyle? hoveredStyle,
+    FlexiChipStyle? focusedStyle,
+    FlexiChipStyle? pressedStyle,
+  }) {
+    return FlexiChipStyle.onEvent(
+      enabled: FlexiChipStyle(
+        height: height,
+        margin: margin,
+        padding: padding,
+        clipBehavior: clipBehavior,
+        overlayColor: overlayColor,
+        shadowColor: shadowColor,
+        elevation: elevation,
+        foregroundStyle: foregroundStyle,
+        foregroundColor: foregroundColor,
+        foregroundOpacity: foregroundOpacity,
+        foregroundAlpha: foregroundAlpha,
+        foregroundSpacing: foregroundSpacing,
+        backgroundColor: backgroundColor,
+        backgroundOpacity: backgroundOpacity,
+        backgroundAlpha: backgroundAlpha,
+        borderColor: borderColor,
+        borderOpacity: borderOpacity,
+        borderAlpha: borderAlpha,
+        borderWidth: borderWidth,
+        borderRadius: borderRadius,
+        borderStyle: borderStyle,
+        avatarSize: avatarSize,
+        avatarForegroundStyle: avatarForegroundStyle,
+        avatarForegroundColor: avatarForegroundColor,
+        avatarBackgroundColor: avatarBackgroundColor,
+        avatarBorderRadius: avatarBorderRadius,
+        checkmarkColor: checkmarkColor,
+        checkmarkSize: checkmarkSize,
+        checkmarkWeight: checkmarkWeight,
+        checkmarkStyle: checkmarkStyle,
+        iconColor: iconColor,
+        iconOpacity: iconOpacity,
+        iconSize: iconSize,
+      ),
+      selected: selectedStyle,
+      disabled: disabledStyle,
+      hovered: hoveredStyle,
+      focused: focusedStyle,
+      pressed: pressedStyle,
+    );
+  }
+
+  /// Create chip's style with default value for filled style.
+  ///
+  /// The [selectedStyle] is style to be merged,
+  /// when events includes [FlexiChipEvent.selected].
+  ///
+  /// The [disabledStyle] style to be merged,
+  /// when events includes [FlexiChipEvent.disabled].
+  ///
+  /// The [hoveredStyle] style to be merged,
+  /// when events includes [FlexiChipEvent.hovered].
+  ///
+  /// The [focusedStyle] style to be merged,
+  /// when events includes [FlexiChipEvent.focused].
+  ///
+  /// The [pressedStyle] style to be merged,
+  /// when events includes [FlexiChipEvent.pressed].
+  factory FlexiChipStyle.filled({
     Color? color,
-    double spacing = FlexiChipStyle.defaultForegroundSpacing,
-    this.margin,
-    this.padding,
-    this.clipBehavior,
-    this.shadowColor,
-    this.elevation = 0,
-    this.borderOpacity = 1,
-    this.borderWidth = 1,
-    this.borderRadius = FlexiChipStyle.defaultBorderRadius,
-    this.foregroundStyle,
-    this.avatarSize = FlexiChipStyle.defaultAvatarSize,
-    this.avatarForegroundStyle,
-    this.avatarForegroundColor,
-    this.avatarBorderRadius,
-    this.checkmarkColor,
-    this.checkmarkSize = FlexiChipStyle.defaultCheckmarkSize,
-    this.checkmarkWeight = FlexiChipStyle.defaultCheckmarkWeight,
-    this.checkmarkStyle,
-    this.iconColor,
-    this.iconOpacity,
-    this.iconSize = FlexiChipStyle.defaultIconSize,
-  })  : foregroundColor = color,
-        foregroundSpacing = spacing,
-        avatarBackgroundColor = color,
-        borderColor = color,
-        borderStyle = BorderStyle.solid,
-        backgroundColor = null,
-        backgroundOpacity = 0;
+    double? height,
+    EdgeInsetsGeometry? margin,
+    EdgeInsetsGeometry? padding,
+    Clip? clipBehavior,
+    Color? overlayColor,
+    Color? shadowColor,
+    double? elevation,
+    TextStyle? foregroundStyle,
+    Color? foregroundColor,
+    double? foregroundOpacity,
+    int? foregroundAlpha,
+    double? foregroundSpacing,
+    double? backgroundOpacity = 1,
+    int? backgroundAlpha,
+    double? borderOpacity = 0,
+    int? borderAlpha,
+    double? borderWidth = 0,
+    BorderRadiusGeometry? borderRadius,
+    BorderStyle? borderStyle = BorderStyle.none,
+    Size? avatarSize,
+    TextStyle? avatarForegroundStyle,
+    Color? avatarForegroundColor,
+    Color? avatarBackgroundColor,
+    BorderRadiusGeometry? avatarBorderRadius,
+    Color? checkmarkColor,
+    double? checkmarkSize,
+    double? checkmarkWeight,
+    CheckmarkStyle? checkmarkStyle,
+    Color? iconColor,
+    double? iconOpacity,
+    double? iconSize,
+    FlexiChipStyle? selectedStyle,
+    FlexiChipStyle? disabledStyle = const FlexiChipStyle(
+      foregroundAlpha: FlexiChipStyle.disabledForegroundAlpha,
+      backgroundAlpha: FlexiChipStyle.disabledBackgroundAlpha,
+      borderAlpha: FlexiChipStyle.disabledBorderAlpha,
+    ),
+    FlexiChipStyle? hoveredStyle,
+    FlexiChipStyle? focusedStyle,
+    FlexiChipStyle? pressedStyle = const FlexiChipStyle(
+      elevation: 5,
+    ),
+  }) {
+    return FlexiChipStyle.onEvent(
+      enabled: FlexiChipStyle(
+        backgroundColor: color,
+        borderColor: color,
+        height: height,
+        margin: margin,
+        padding: padding,
+        clipBehavior: clipBehavior,
+        overlayColor: overlayColor,
+        shadowColor: shadowColor,
+        elevation: elevation,
+        foregroundStyle: foregroundStyle,
+        foregroundColor: foregroundColor,
+        foregroundOpacity: foregroundOpacity,
+        foregroundAlpha: foregroundAlpha,
+        foregroundSpacing: foregroundSpacing,
+        backgroundOpacity: backgroundOpacity,
+        backgroundAlpha: backgroundAlpha,
+        borderOpacity: borderOpacity,
+        borderAlpha: borderAlpha,
+        borderWidth: borderWidth,
+        borderRadius: borderRadius,
+        borderStyle: borderStyle,
+        avatarSize: avatarSize,
+        avatarForegroundStyle: avatarForegroundStyle,
+        avatarForegroundColor: avatarForegroundColor,
+        avatarBackgroundColor: avatarBackgroundColor,
+        avatarBorderRadius: avatarBorderRadius,
+        checkmarkColor: checkmarkColor,
+        checkmarkSize: checkmarkSize,
+        checkmarkWeight: checkmarkWeight,
+        checkmarkStyle: checkmarkStyle,
+        iconColor: iconColor,
+        iconOpacity: iconOpacity,
+        iconSize: iconSize,
+      ),
+      selected: selectedStyle,
+      disabled: disabledStyle,
+      hovered: hoveredStyle,
+      focused: focusedStyle,
+      pressed: pressedStyle,
+    );
+  }
 
-  /// Chip style with fill color whose material elevates when pressed.
-  const FlexiChipStyle.elevated({
+  /// Create chip's style with default value for outlined style.
+  ///
+  /// The [selected] is style to be merged,
+  /// when events includes [FlexiChipEvent.selected].
+  ///
+  /// The [disabled] style to be merged,
+  /// when events includes [FlexiChipEvent.disabled].
+  ///
+  /// The [hovered] style to be merged,
+  /// when events includes [FlexiChipEvent.hovered].
+  ///
+  /// The [focused] style to be merged,
+  /// when events includes [FlexiChipEvent.focused].
+  ///
+  /// The [pressed] style to be merged,
+  /// when events includes [FlexiChipEvent.pressed].
+  factory FlexiChipStyle.outlined({
     Color? color,
-    this.margin,
-    this.padding,
-    this.clipBehavior,
-    this.shadowColor,
-    this.elevation = 0,
-    this.foregroundStyle,
-    this.foregroundColor = const Color(0xFFFFFFFF),
-    this.foregroundSpacing = FlexiChipStyle.defaultForegroundSpacing,
-    this.borderRadius = FlexiChipStyle.defaultBorderRadius,
-    this.avatarSize = FlexiChipStyle.defaultAvatarSize,
-    this.avatarForegroundStyle,
-    this.avatarForegroundColor,
-    this.avatarBackgroundColor,
-    this.avatarBorderRadius,
-    this.checkmarkColor,
-    this.checkmarkSize = FlexiChipStyle.defaultCheckmarkSize,
-    this.checkmarkWeight = FlexiChipStyle.defaultCheckmarkWeight,
-    this.checkmarkStyle,
-    this.iconColor,
-    this.iconOpacity,
-    this.iconSize = FlexiChipStyle.defaultIconSize,
-  })  : backgroundColor = color,
-        backgroundOpacity = 1,
-        borderColor = color,
-        borderStyle = BorderStyle.none,
-        borderOpacity = 0,
-        borderWidth = 0;
+    double? height,
+    EdgeInsetsGeometry? margin,
+    EdgeInsetsGeometry? padding,
+    Clip? clipBehavior,
+    Color? overlayColor,
+    Color? shadowColor,
+    double? elevation,
+    TextStyle? foregroundStyle,
+    double? foregroundOpacity,
+    int? foregroundAlpha,
+    double? foregroundSpacing,
+    Color? backgroundColor,
+    double? backgroundOpacity = 0,
+    int? backgroundAlpha,
+    double? borderOpacity,
+    int? borderAlpha,
+    double? borderWidth = 1,
+    BorderRadiusGeometry? borderRadius,
+    BorderStyle? borderStyle = BorderStyle.solid,
+    Size? avatarSize,
+    TextStyle? avatarForegroundStyle,
+    Color? avatarForegroundColor,
+    BorderRadiusGeometry? avatarBorderRadius,
+    Color? checkmarkColor,
+    double? checkmarkSize,
+    double? checkmarkWeight,
+    CheckmarkStyle? checkmarkStyle,
+    Color? iconColor,
+    double? iconOpacity,
+    double? iconSize,
+    FlexiChipStyle? selectedStyle,
+    FlexiChipStyle? disabledStyle = const FlexiChipStyle(
+      foregroundAlpha: FlexiChipStyle.disabledForegroundAlpha,
+      borderAlpha: FlexiChipStyle.disabledBorderAlpha,
+    ),
+    FlexiChipStyle? hoveredStyle,
+    FlexiChipStyle? focusedStyle,
+    FlexiChipStyle? pressedStyle,
+  }) {
+    return FlexiChipStyle.onEvent(
+      enabled: FlexiChipStyle(
+        borderColor: color,
+        foregroundColor: color,
+        avatarBackgroundColor: color,
+        height: height,
+        margin: margin,
+        padding: padding,
+        clipBehavior: clipBehavior,
+        overlayColor: overlayColor,
+        shadowColor: shadowColor,
+        elevation: elevation,
+        foregroundStyle: foregroundStyle,
+        foregroundOpacity: foregroundOpacity,
+        foregroundAlpha: foregroundAlpha,
+        foregroundSpacing: foregroundSpacing,
+        backgroundColor: backgroundColor,
+        backgroundOpacity: backgroundOpacity,
+        backgroundAlpha: backgroundAlpha,
+        borderOpacity: borderOpacity,
+        borderAlpha: borderAlpha,
+        borderWidth: borderWidth,
+        borderRadius: borderRadius,
+        borderStyle: borderStyle,
+        avatarSize: avatarSize,
+        avatarForegroundStyle: avatarForegroundStyle,
+        avatarForegroundColor: avatarForegroundColor,
+        avatarBorderRadius: avatarBorderRadius,
+        checkmarkColor: checkmarkColor,
+        checkmarkSize: checkmarkSize,
+        checkmarkWeight: checkmarkWeight,
+        checkmarkStyle: checkmarkStyle,
+        iconColor: iconColor,
+        iconOpacity: iconOpacity,
+        iconSize: iconSize,
+      ),
+      selected: selectedStyle,
+      disabled: disabledStyle,
+      hovered: hoveredStyle,
+      focused: focusedStyle,
+      pressed: pressedStyle,
+    );
+  }
 
-  /// A [MaterialStateFlexiChipStyle] created
-  /// from a [MaterialPropertyResolver<FlexiChipStyle>]
-  /// callback alone.
-  static MaterialStateFlexiChipStyle stated(
-    MaterialPropertyResolver<FlexiChipStyle> callback,
-  ) =>
-      _MaterialStateFlexiChipStyle(callback);
+  /// Resolves the value for the given set of events
+  /// if `value` is an event driven [FlexiChipStyle],
+  /// otherwise returns the value itself.
+  static FlexiChipStyle? evaluate(
+    FlexiChipStyle? value,
+    Set<WidgetEvent> events,
+  ) {
+    return _DrivenFlexiChipStyle.evaluate(value, events);
+  }
 
-  static const defaultColor = Color(0xDD000000);
-  static const defaultShadowColor = Color(0xFF000000);
   static const defaultClipBehavior = Clip.antiAlias;
   static const defaultBorderWidth = 1.0;
   static const defaultBorderStyle = BorderStyle.solid;
@@ -147,25 +463,12 @@ class FlexiChipStyle {
   static const defaultCheckmarkWeight = 2.0;
   static const defaultCheckmarkSize = 18.0;
   static const defaultForegroundSpacing = 8.0;
+  static const disabledForegroundAlpha = 0x61; // 38%
   static const disabledBackgroundAlpha = 0x0c; // 38% * 12% = 5%
   static const disabledBorderAlpha = 0x0c; // 38% * 12% = 5%
-  static const disabledForegroundAlpha = 0x61; // 38%
 
-  /// The Color to be apply to the checkmark.
-  ///
-  /// If null fallback to [avatarForegroundColor] or [foregroundColor]
-  final Color? checkmarkColor;
-
-  /// Stroke width of the checkmark.
-  ///
-  /// Defaults to [FlexiChipStyle.defaultCheckmarkWeight].
-  final double? checkmarkWeight;
-
-  /// Defaults to [FlexiChipStyle.defaultCheckmarkSize].
-  final double? checkmarkSize;
-
-  /// Defaults to [CheckmarkStyle.sharp].
-  final CheckmarkStyle? checkmarkStyle;
+  /// Defaults to [FlexiChipStyle.defaultHeight]
+  final double? height;
 
   /// Empty space to surround the outside chip.
   final EdgeInsetsGeometry? margin;
@@ -182,6 +485,9 @@ class FlexiChipStyle {
   ///
   /// Defaults to [FlexiChipStyle.defaultClipBehavior]
   final Clip? clipBehavior;
+
+  /// Defines the ink response colors.
+  final Color? overlayColor;
 
   /// When [elevation] is non zero the color to use for the chip's shadow color.
   final Color? shadowColor;
@@ -203,6 +509,12 @@ class FlexiChipStyle {
   /// The color to be applied to the chip's label, icon, and checkmark
   final Color? foregroundColor;
 
+  /// Opacity to be apply to [foregroundColor].
+  final double? foregroundOpacity;
+
+  /// Alpha to be apply to [foregroundColor].
+  final int? foregroundAlpha;
+
   /// How much space to place between chip's foreground widget in a run in the main axis.
   final double? foregroundSpacing;
 
@@ -212,11 +524,17 @@ class FlexiChipStyle {
   /// Opacity to be apply to [backgroundColor].
   final double? backgroundOpacity;
 
+  /// Alpha to be apply to [backgroundColor].
+  final int? backgroundAlpha;
+
   /// Color to be used for the chip's border.
   final Color? borderColor;
 
   /// Opacity to be apply to [borderColor].
   final double? borderOpacity;
+
+  /// Alpha to be apply to [borderColor].
+  final int? borderAlpha;
 
   /// The width of this side of the chip's border, in logical pixels.
   final double? borderWidth;
@@ -251,6 +569,22 @@ class FlexiChipStyle {
   /// Defaults to [FlexiChipStyle.defaultAvatarSize].
   final Size? avatarSize;
 
+  /// The Color to be apply to the checkmark.
+  ///
+  /// If null fallback to [avatarForegroundColor] or [foregroundColor].
+  final Color? checkmarkColor;
+
+  /// Defaults to [FlexiChipStyle.defaultCheckmarkSize].
+  final double? checkmarkSize;
+
+  /// Stroke width of the checkmark.
+  ///
+  /// Defaults to [FlexiChipStyle.defaultCheckmarkWeight].
+  final double? checkmarkWeight;
+
+  /// Defaults to [CheckmarkStyle.sharp].
+  final CheckmarkStyle? checkmarkStyle;
+
   /// Color to be used for the icon's inside the chip.
   final Color? iconColor;
 
@@ -265,46 +599,59 @@ class FlexiChipStyle {
   /// Creates a copy of this [FlexiChipStyle] but with
   /// the given fields replaced with the new values.
   FlexiChipStyle copyWith({
+    double? height,
+    EdgeInsetsGeometry? margin,
+    EdgeInsetsGeometry? padding,
+    Clip? clipBehavior,
+    Color? overlayColor,
+    Color? shadowColor,
+    double? elevation,
     TextStyle? foregroundStyle,
     Color? foregroundColor,
+    double? foregroundOpacity,
+    int? foregroundAlpha,
     double? foregroundSpacing,
     Color? backgroundColor,
     double? backgroundOpacity,
-    Color? shadowColor,
-    EdgeInsetsGeometry? margin,
-    EdgeInsetsGeometry? padding,
-    double? elevation,
+    int? backgroundAlpha,
     Color? borderColor,
     double? borderOpacity,
+    int? borderAlpha,
     double? borderWidth,
     BorderRadiusGeometry? borderRadius,
     BorderStyle? borderStyle,
-    Clip? clipBehavior,
     Size? avatarSize,
     TextStyle? avatarForegroundStyle,
     Color? avatarForegroundColor,
     Color? avatarBackgroundColor,
     BorderRadiusGeometry? avatarBorderRadius,
     Color? checkmarkColor,
-    double? checkmarkWidth,
     double? checkmarkSize,
+    double? checkmarkWeight,
     CheckmarkStyle? checkmarkStyle,
     Color? iconColor,
-    double? iconSize,
     double? iconOpacity,
+    double? iconSize,
   }) {
     return FlexiChipStyle(
+      height: height ?? this.height,
+      margin: margin ?? this.margin,
+      padding: padding ?? this.padding,
+      clipBehavior: clipBehavior ?? this.clipBehavior,
+      overlayColor: overlayColor ?? this.overlayColor,
+      shadowColor: shadowColor ?? this.shadowColor,
+      elevation: elevation ?? this.elevation,
       foregroundStyle: foregroundStyle ?? this.foregroundStyle,
       foregroundColor: foregroundColor ?? this.foregroundColor,
+      foregroundOpacity: foregroundOpacity ?? this.foregroundOpacity,
+      foregroundAlpha: foregroundAlpha ?? this.foregroundAlpha,
       foregroundSpacing: foregroundSpacing ?? this.foregroundSpacing,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       backgroundOpacity: backgroundOpacity ?? this.backgroundOpacity,
-      shadowColor: shadowColor ?? this.shadowColor,
-      margin: margin ?? this.margin,
-      padding: padding ?? this.padding,
-      elevation: elevation ?? this.elevation,
+      backgroundAlpha: backgroundAlpha ?? this.backgroundAlpha,
       borderColor: borderColor ?? this.borderColor,
       borderOpacity: borderOpacity ?? this.borderOpacity,
+      borderAlpha: borderAlpha ?? this.borderAlpha,
       borderWidth: borderWidth ?? this.borderWidth,
       borderRadius: borderRadius ?? this.borderRadius,
       borderStyle: borderStyle ?? this.borderStyle,
@@ -316,14 +663,13 @@ class FlexiChipStyle {
       avatarBackgroundColor:
           avatarBackgroundColor ?? this.avatarBackgroundColor,
       avatarBorderRadius: avatarBorderRadius ?? this.avatarBorderRadius,
-      clipBehavior: clipBehavior ?? this.clipBehavior,
       checkmarkColor: checkmarkColor ?? this.checkmarkColor,
-      checkmarkWeight: checkmarkWidth ?? this.checkmarkWeight,
       checkmarkSize: checkmarkSize ?? this.checkmarkSize,
+      checkmarkWeight: checkmarkWeight ?? this.checkmarkWeight,
       checkmarkStyle: checkmarkStyle ?? this.checkmarkStyle,
       iconColor: iconColor ?? this.iconColor,
-      iconSize: iconSize ?? this.iconSize,
       iconOpacity: iconOpacity ?? this.iconOpacity,
+      iconSize: iconSize ?? this.iconSize,
     );
   }
 
@@ -334,16 +680,24 @@ class FlexiChipStyle {
     if (other == null) return this;
 
     return copyWith(
+      height: other.height,
+      margin: other.margin,
+      padding: other.padding,
+      clipBehavior: other.clipBehavior,
+      overlayColor: other.overlayColor,
+      shadowColor: other.shadowColor,
+      elevation: other.elevation,
       foregroundStyle: other.foregroundStyle,
       foregroundColor: other.foregroundColor,
+      foregroundOpacity: other.foregroundOpacity,
+      foregroundAlpha: other.foregroundAlpha,
       foregroundSpacing: other.foregroundSpacing,
       backgroundColor: other.backgroundColor,
       backgroundOpacity: other.backgroundOpacity,
-      margin: other.margin,
-      padding: other.padding,
-      elevation: other.elevation,
+      backgroundAlpha: other.backgroundAlpha,
       borderColor: other.borderColor,
       borderOpacity: other.borderOpacity,
+      borderAlpha: other.borderAlpha,
       borderWidth: other.borderWidth,
       borderRadius: other.borderRadius,
       borderStyle: other.borderStyle,
@@ -352,62 +706,164 @@ class FlexiChipStyle {
       avatarForegroundColor: other.avatarForegroundColor,
       avatarBackgroundColor: other.avatarBackgroundColor,
       avatarBorderRadius: other.avatarBorderRadius,
-      clipBehavior: other.clipBehavior,
       checkmarkColor: other.checkmarkColor,
-      checkmarkWidth: other.checkmarkWeight,
       checkmarkSize: other.checkmarkSize,
+      checkmarkWeight: other.checkmarkWeight,
       checkmarkStyle: other.checkmarkStyle,
-      shadowColor: other.shadowColor,
       iconColor: other.iconColor,
-      iconSize: other.iconSize,
       iconOpacity: other.iconOpacity,
+      iconSize: other.iconSize,
     );
   }
 }
 
-abstract class MaterialStateFlexiChipStyle extends FlexiChipStyle
-    implements MaterialStateProperty<FlexiChipStyle?> {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const MaterialStateFlexiChipStyle(FlexiChipStyle defaultValue);
+// /// Chip style with tonal fill color.
+// class FlexiChipTonedStyle extends FlexiChipStyle {
+//   const FlexiChipTonedStyle({
+//     super.height,
+//     super.margin,
+//     super.padding,
+//     super.clipBehavior,
+//     super.overlayColor,
+//     super.shadowColor,
+//     super.elevation,
+//     super.foregroundStyle,
+//     super.foregroundColor,
+//     super.foregroundOpacity,
+//     super.foregroundAlpha,
+//     super.foregroundSpacing = FlexiChipStyle.defaultForegroundSpacing,
+//     super.backgroundColor,
+//     super.backgroundOpacity = .12,
+//     super.backgroundAlpha,
+//     super.borderColor,
+//     super.borderOpacity = 1,
+//     super.borderAlpha,
+//     super.borderWidth = 1,
+//     super.borderRadius = FlexiChipStyle.defaultBorderRadius,
+//     super.borderStyle = BorderStyle.none,
+//     super.avatarSize = FlexiChipStyle.defaultAvatarSize,
+//     super.avatarForegroundStyle,
+//     super.avatarForegroundColor,
+//     super.avatarBackgroundColor,
+//     super.avatarBorderRadius,
+//     super.checkmarkColor,
+//     super.checkmarkSize = FlexiChipStyle.defaultCheckmarkSize,
+//     super.checkmarkWeight = FlexiChipStyle.defaultCheckmarkWeight,
+//     super.checkmarkStyle,
+//     super.iconColor,
+//     super.iconOpacity,
+//     super.iconSize = FlexiChipStyle.defaultIconSize,
+//   });
+// }
 
-  /// Creates a [MaterialStateFlexiChipStyle]
-  /// from a [MaterialPropertyResolver<FlexiChipStyle>]
-  /// callback function.
-  ///
-  /// If used as a regular FlexiChipStyle,
-  /// the FlexiChipStyle resolved in the default state will be used.
-  ///
-  /// The given callback parameter must return a non-null color in the default
-  /// state.
-  static MaterialStateFlexiChipStyle resolveWith(
-    MaterialPropertyResolver<FlexiChipStyle> callback,
-  ) =>
-      _MaterialStateFlexiChipStyle(callback);
+// /// Chip style with fill color.
+// class FlexiChipFilledStyle extends FlexiChipStyle {
+//   const FlexiChipFilledStyle({
+//     Color? color,
+//     super.height,
+//     super.margin,
+//     super.padding,
+//     super.clipBehavior,
+//     super.overlayColor,
+//     super.shadowColor,
+//     super.elevation,
+//     super.foregroundStyle,
+//     super.foregroundColor,
+//     super.foregroundOpacity,
+//     super.foregroundAlpha,
+//     super.foregroundSpacing = FlexiChipStyle.defaultForegroundSpacing,
+//     super.backgroundOpacity = 1,
+//     super.backgroundAlpha,
+//     super.borderOpacity = 0,
+//     super.borderAlpha,
+//     super.borderWidth = 0,
+//     super.borderStyle = BorderStyle.none,
+//     super.borderRadius = FlexiChipStyle.defaultBorderRadius,
+//     super.avatarSize = FlexiChipStyle.defaultAvatarSize,
+//     super.avatarForegroundStyle,
+//     super.avatarForegroundColor,
+//     super.avatarBackgroundColor,
+//     super.avatarBorderRadius,
+//     super.checkmarkColor,
+//     super.checkmarkSize = FlexiChipStyle.defaultCheckmarkSize,
+//     super.checkmarkWeight = FlexiChipStyle.defaultCheckmarkWeight,
+//     super.checkmarkStyle,
+//     super.iconColor,
+//     super.iconOpacity,
+//     super.iconSize = FlexiChipStyle.defaultIconSize,
+//   }) : super(
+//           backgroundColor: color,
+//           borderColor: color,
+//         );
+// }
 
-  /// Returns a [FlexiChipStyle] that's to be used when a Material component is
-  /// in the specified state. Return null to defer to the default value of the
-  /// widget or theme.
+// /// Chip style with outlined border.
+// class FlexiChipOutlinedStyle extends FlexiChipStyle {
+//   const FlexiChipOutlinedStyle({
+//     Color? color,
+//     super.height,
+//     super.margin,
+//     super.padding,
+//     super.clipBehavior,
+//     super.overlayColor,
+//     super.shadowColor,
+//     super.elevation,
+//     super.borderOpacity = 1,
+//     super.borderAlpha,
+//     super.borderWidth = 1,
+//     super.borderRadius = FlexiChipStyle.defaultBorderRadius,
+//     super.borderStyle = BorderStyle.solid,
+//     super.foregroundStyle,
+//     super.foregroundOpacity,
+//     super.foregroundAlpha,
+//     super.foregroundSpacing = FlexiChipStyle.defaultForegroundSpacing,
+//     super.backgroundColor,
+//     super.backgroundOpacity,
+//     super.backgroundAlpha,
+//     super.avatarSize = FlexiChipStyle.defaultAvatarSize,
+//     super.avatarForegroundStyle,
+//     super.avatarForegroundColor,
+//     super.avatarBorderRadius,
+//     super.checkmarkColor,
+//     super.checkmarkSize = FlexiChipStyle.defaultCheckmarkSize,
+//     super.checkmarkWeight = FlexiChipStyle.defaultCheckmarkWeight,
+//     super.checkmarkStyle,
+//     super.iconColor,
+//     super.iconOpacity,
+//     super.iconSize = FlexiChipStyle.defaultIconSize,
+//   }) : super(
+//           foregroundColor: color,
+//           avatarBackgroundColor: color,
+//           borderColor: color,
+//         );
+// }
+
+abstract class _DrivenFlexiChipStyle extends FlexiChipStyle
+    implements DrivenProperty<FlexiChipStyle?> {
+  _DrivenFlexiChipStyle(FlexiChipStyle? style) : super.from(style);
+
   @override
-  FlexiChipStyle? resolve(Set<MaterialState> states);
+  FlexiChipStyle? resolve(Set<WidgetEvent> events);
+
+  static FlexiChipStyle? evaluate(
+    FlexiChipStyle? value,
+    Set<WidgetEvent> events,
+  ) {
+    return DrivenProperty.evaluate<FlexiChipStyle?>(value, events);
+  }
+
+  static FlexiChipStyle by(
+    DrivenPropertyResolver<FlexiChipStyle?> callback,
+  ) {
+    return _DrivenFlexiChipStyleBy(callback);
+  }
 }
 
-/// A [MaterialStateFlexiChipStyle] created
-/// from a [MaterialPropertyResolver<FlexiChipStyle>]
-/// callback alone.
-///
-/// If used as a regular FlexiChipStyle,
-/// the FlexiChipStyle resolved in the default state will be used.
-///
-/// Used by [MaterialStateFlexiChipStyle.resolveWith].
-class _MaterialStateFlexiChipStyle extends MaterialStateFlexiChipStyle {
-  _MaterialStateFlexiChipStyle(this._resolve) : super(_resolve(_defaultStates));
+class _DrivenFlexiChipStyleBy extends _DrivenFlexiChipStyle {
+  _DrivenFlexiChipStyleBy(this._resolver) : super(_resolver({}));
 
-  final MaterialPropertyResolver<FlexiChipStyle> _resolve;
-
-  /// The default state for a Material component, the empty set of interaction states.
-  static const Set<MaterialState> _defaultStates = <MaterialState>{};
+  final DrivenPropertyResolver<FlexiChipStyle?> _resolver;
 
   @override
-  FlexiChipStyle resolve(Set<MaterialState> states) => _resolve(states);
+  FlexiChipStyle? resolve(Set<WidgetEvent> events) => _resolver(events);
 }

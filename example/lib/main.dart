@@ -56,6 +56,23 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   bool _selected = false;
 
+  void _setSelected(bool value) {
+    setState(() {
+      _selected = value;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    final style = FlexiChipStyle.filled();
+    print(style.elevation);
+
+    final resolved = FlexiChipStyle.evaluate(style, {FlexiChipEvent.pressed});
+    print(resolved?.elevation);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,56 +89,73 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         child: Wrap(
-          spacing: 5,
+          spacing: 25,
+          direction: Axis.vertical,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            FlexiChip(
-              style: const FlexiChipStyle.outlined(
-                color: Colors.green,
-                borderRadius: BorderRadius.all(Radius.circular(25)),
-                borderWidth: 2,
-              ),
-              selectedStyle: FlexiChipStyle.stated((states) {
-                const base = FlexiChipStyle.elevated(
-                  useCheckmark: true,
-                  color: Colors.green,
-                  avatarColor: Colors.black54,
-                );
-                if (states.contains(MaterialState.pressed)) {
-                  return base.copyWith(elevation: 5);
-                }
-                return base;
-              }),
-              // style: const FlexiChipStyle.outlined(
-              //   color: Colors.green,
-              //   borderWidth: 2,
-              // ),
-              // activeStyle: const FlexiChipStyle.elevated(
-              //   useCheckmark: true,
-              //   color: Colors.green,
-              // ),
-              label: const Text('Dart'),
-              avatarText: const Text('DT'),
-              // trailing: const Icon(Icons.close),
-              // disabled: true,
-              selected: _selected,
-              onSelected: (selected) => setState(() => _selected = selected),
-              onDeleted: () => print('delete'),
+            Wrap(
+              spacing: 10,
+              children: [
+                FlexiChip(
+                  label: const Text('Toned Chip'),
+                  style: FlexiChipStyle.toned(),
+                  selected: _selected,
+                  onPressed: () => {},
+                ),
+                FlexiChip(
+                  label: const Text('Toned Chip'),
+                  leading: const Icon(Icons.calendar_month),
+                  style: FlexiChipStyle.toned(),
+                  selected: _selected,
+                  disabled: true,
+                  onPressed: () => {},
+                ),
+              ],
             ),
-            FlexiChip(
-              // style: const FlexiChipStyle.outlined(),
-              selectedStyle: const FlexiChipStyle.outlined(
-                useCheckmark: true,
-                color: Colors.red,
-                borderWidth: 2,
-                borderRadius: BorderRadius.all(Radius.circular(15)),
-                foregroundStyle: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              label: const Text('TS'),
-              // trailing: const Icon(Icons.calendar_month),
-              tooltip: 'Typescript',
-              // disabled: true,
-              selected: _selected,
-              onSelected: (selected) => setState(() => _selected = selected),
+            Wrap(
+              spacing: 10,
+              children: [
+                FlexiChip(
+                  label: const Text('Outlined Chip'),
+                  style: FlexiChipStyle.outlined(),
+                  checkmark: true,
+                  selected: _selected,
+                  onDeleted: () {},
+                ),
+                FlexiChip(
+                  label: const Text('Outlined Chip'),
+                  trailing: const Icon(Icons.calendar_month),
+                  style: FlexiChipStyle.outlined(),
+                  checkmark: true,
+                  disabled: true,
+                  selected: _selected,
+                  onSelected: _setSelected,
+                ),
+              ],
+            ),
+            Wrap(
+              spacing: 10,
+              children: [
+                FlexiChip(
+                  label: const Text('Filled Chip'),
+                  avatarText: const Text('FC'),
+                  style: FlexiChipStyle.filled(
+                    selectedStyle: FlexiChipStyle(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                  selected: _selected,
+                  onSelected: _setSelected,
+                  onDeleted: () {},
+                ),
+                FlexiChip(
+                  label: const Text('Filled Chip'),
+                  leading: const Icon(Icons.image),
+                  style: FlexiChipStyle.filled(),
+                  selected: _selected,
+                  disabled: true,
+                ),
+              ],
             ),
           ],
         ),

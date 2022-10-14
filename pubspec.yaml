@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  widget_event: ^1.2.3
   animated_checkmark: ^1.0.0
 
 dev_dependencies:
