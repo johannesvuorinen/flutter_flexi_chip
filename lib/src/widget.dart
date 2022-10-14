@@ -402,7 +402,11 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
 
   Color get avatarBackgroundColor {
     final color = style.avatarBackgroundColor ?? borderColor;
-    return isFilled ? Colors.white.withOpacity(.5) : color;
+    return isFilled
+        ? appTheme.brightness == Brightness.light
+            ? Colors.white.withOpacity(.5)
+            : Colors.black.withOpacity(.5)
+        : color;
   }
 
   Color get avatarForegroundColor {
