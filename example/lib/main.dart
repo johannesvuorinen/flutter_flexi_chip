@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flexi_chip/flexi_chip.dart';
 import 'package:theme_patrol/theme_patrol.dart';
@@ -65,10 +67,10 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
 
     final style = FlexiChipStyle.filled();
-    print(style.elevation);
+    log('${style.elevation}', name: 'style');
 
-    final resolved = FlexiChipStyle.evaluate(style, {FlexiChipEvent.pressed});
-    print(resolved?.elevation);
+    final evaluated = FlexiChipStyle.evaluate(style, {FlexiChipEvent.pressed});
+    log('${evaluated?.elevation}', name: 'style evaluated');
   }
 
   @override
