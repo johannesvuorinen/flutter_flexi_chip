@@ -57,9 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _selected = false;
 
   void _setSelected(bool value) {
-    setState(() {
-      _selected = value;
-    });
+    setState(() => _selected = value);
   }
 
   @override
@@ -98,7 +96,6 @@ class _MyHomePageState extends State<MyHomePage> {
               children: [
                 FlexiChip(
                   label: const Text('Toned Chip'),
-                  style: FlexiChipStyle.toned(),
                   selected: _selected,
                   onPressed: () => {},
                 ),
@@ -153,6 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   leading: const Icon(Icons.image),
                   style: FlexiChipStyle.filled(),
                   selected: _selected,
+                  onDeleted: () {},
                   disabled: true,
                 ),
               ],

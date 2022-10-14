@@ -1,39 +1,24 @@
-<!-- 
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+![Pub Version](https://img.shields.io/pub/v/flexi_chip) ![GitHub](https://img.shields.io/github/license/davigmacode/flutter_flexi_chip)
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages). 
+<a href="https://www.buymeacoffee.com/davigmacode" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="195" height="55"></a>
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages). 
--->
+Chip widget with smooth animation, event driven style, and many more.
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+## Preview
+
+[![Preview](https://github.com/davigmacode/flutter_flexi_chip/raw/main/media/preview.gif)](https://davigmacode.github.io/flutter_flexi_chip)
+
+[Demo](https://davigmacode.github.io/flutter_flexi_chip)
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
-
-## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+* Event driven chip's style
+* Different style for each event
+* Animated every aspect of the chip's style
+* Smooth animation
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder. 
+For a complete usage, please see the [example](https://pub.dev/packages/flexi_chip#-example-tab-).
 
-```dart
-const like = 'sample';
-```
-
-## Additional information
-
-TODO: Tell users more about the package: where to find more information, how to 
-contribute to the package, how to file issues, what response they can expect 
-from the package authors, and more.
+To read more about classes and other references used by `flexi_chip`, see the [API Reference](https://pub.dev/documentation/flexi_chip/latest/).

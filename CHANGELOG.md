@@ -1,3 +1,6 @@
-## 0.0.1
+## 1.0.0
 
-* TODO: Describe initial release.
+* Event driven chip's style
+* Different style for each event
+* Animated every aspect of the chip's style
+* Smooth animation
