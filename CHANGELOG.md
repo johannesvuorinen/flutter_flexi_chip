@@ -1,3 +1,7 @@
+## 1.0.2
+
+* Alias to extend for other package
+
 ## 1.0.1
 
 * Removed animated_checkmark from package exports
