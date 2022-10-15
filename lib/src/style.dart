@@ -3,6 +3,12 @@ import 'package:widget_event/widget_event.dart';
 import 'package:animated_checkmark/animated_checkmark.dart';
 import 'event.dart';
 
+typedef FlexiChipCheckmarkStyle = CheckmarkStyle;
+
+/// Signature for the function that returns a value
+/// of type [FlexiChipStyle] based on a given set of events.
+typedef FlexiChipStyleResolver = DrivenPropertyResolver<FlexiChipStyle?>;
+
 /// Default chip's style.
 class FlexiChipStyle {
   const FlexiChipStyle({
@@ -79,7 +85,7 @@ class FlexiChipStyle {
 
   /// Create an event driven chip's style using [callback].
   factory FlexiChipStyle.driven(
-    DrivenPropertyResolver<FlexiChipStyle?> callback,
+    FlexiChipStyleResolver callback,
   ) {
     return _DrivenFlexiChipStyle.by(callback);
   }
@@ -177,7 +183,7 @@ class FlexiChipStyle {
     Color? checkmarkColor,
     double? checkmarkSize,
     double? checkmarkWeight,
-    CheckmarkStyle? checkmarkStyle,
+    FlexiChipCheckmarkStyle? checkmarkStyle,
     Color? iconColor,
     double? iconOpacity,
     double? iconSize,
@@ -280,7 +286,7 @@ class FlexiChipStyle {
     Color? checkmarkColor,
     double? checkmarkSize,
     double? checkmarkWeight,
-    CheckmarkStyle? checkmarkStyle,
+    FlexiChipCheckmarkStyle? checkmarkStyle,
     Color? iconColor,
     double? iconOpacity,
     double? iconSize,
@@ -384,7 +390,7 @@ class FlexiChipStyle {
     Color? checkmarkColor,
     double? checkmarkSize,
     double? checkmarkWeight,
-    CheckmarkStyle? checkmarkStyle,
+    FlexiChipCheckmarkStyle? checkmarkStyle,
     Color? iconColor,
     double? iconOpacity,
     double? iconSize,
@@ -582,8 +588,8 @@ class FlexiChipStyle {
   /// Defaults to [FlexiChipStyle.defaultCheckmarkWeight].
   final double? checkmarkWeight;
 
-  /// Defaults to [CheckmarkStyle.sharp].
-  final CheckmarkStyle? checkmarkStyle;
+  /// Defaults to [FlexiChipCheckmarkStyle.sharp].
+  final FlexiChipCheckmarkStyle? checkmarkStyle;
 
   /// Color to be used for the icon's inside the chip.
   final Color? iconColor;
@@ -628,7 +634,7 @@ class FlexiChipStyle {
     Color? checkmarkColor,
     double? checkmarkSize,
     double? checkmarkWeight,
-    CheckmarkStyle? checkmarkStyle,
+    FlexiChipCheckmarkStyle? checkmarkStyle,
     Color? iconColor,
     double? iconOpacity,
     double? iconSize,
@@ -732,7 +738,7 @@ abstract class _DrivenFlexiChipStyle extends FlexiChipStyle
   }
 
   static FlexiChipStyle by(
-    DrivenPropertyResolver<FlexiChipStyle?> callback,
+    FlexiChipStyleResolver callback,
   ) {
     return _DrivenFlexiChipStyleBy(callback);
   }
@@ -741,7 +747,7 @@ abstract class _DrivenFlexiChipStyle extends FlexiChipStyle
 class _DrivenFlexiChipStyleBy extends _DrivenFlexiChipStyle {
   _DrivenFlexiChipStyleBy(this._resolver) : super(_resolver({}));
 
-  final DrivenPropertyResolver<FlexiChipStyle?> _resolver;
+  final FlexiChipStyleResolver _resolver;
 
   @override
   FlexiChipStyle? resolve(Set<WidgetEvent> events) => _resolver(events);

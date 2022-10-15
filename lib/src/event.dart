@@ -1,6 +1,10 @@
 import 'package:widget_event/widget_event.dart';
 
-abstract class FlexiChipEvent {
+/// Interactive events that [FlexiChip] can take on
+/// when receiving input from the user.
+abstract class FlexiChipEvent extends WidgetEvent {
+  const FlexiChipEvent(String value) : super(value);
+
   /// The state when this item has been selected.
   ///
   /// This applies to things that can be toggled (such as chips and checkboxes)
@@ -61,3 +65,6 @@ abstract class FlexiChipEvent {
 /// The value should only be changed with update;
 /// it should not be modified directly.
 class FlexiChipEventController extends WidgetEventController {}
+
+/// Set of WidgetEvent
+typedef FlexiChipEvents = Set<WidgetEvent>;
