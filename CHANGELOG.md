@@ -1,3 +1,7 @@
+## 1.0.1
+
+* Removed animated_checkmark from package exports
+
 ## 1.0.0
 
 * Event driven chip's style
