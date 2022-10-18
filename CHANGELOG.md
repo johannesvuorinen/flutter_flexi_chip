@@ -1,3 +1,8 @@
+## 1.0.4
+
+* Fixed theme flickering
+* Removed FlexiChipStyleResolver to fixed dart doc crash
+
 ## 1.0.3
 
 * Update dependencies

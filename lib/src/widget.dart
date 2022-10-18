@@ -5,6 +5,7 @@ import 'container.dart';
 import 'style.dart';
 import 'event.dart';
 
+/// Chip widget with smooth animation, event driven style, and many more.
 class FlexiChip extends ImplicitlyAnimatedWidget {
   const FlexiChip({
     Key? key,
@@ -119,26 +120,11 @@ class FlexiChip extends ImplicitlyAnimatedWidget {
 
   /// The splash color of the ink response. If this property is null then the
   /// splash color of the theme, [ThemeData.splashColor], will be used.
-  ///
-  /// See also:
-  ///
-  ///  * [splashFactory], which defines the appearance of the splash.
-  ///  * [radius], the (maximum) size of the ink splash.
-  ///  * [highlightColor], the color of the highlight.
   final Color? splashColor;
 
   /// Defines the appearance of the splash.
   ///
   /// Defaults to the value of the theme's splash factory: [ThemeData.splashFactory].
-  ///
-  /// See also:
-  ///
-  ///  * [radius], the (maximum) size of the ink splash.
-  ///  * [splashColor], the color of the splash.
-  ///  * [highlightColor], the color of the highlight.
-  ///  * [InkSplash.splashFactory], which defines the default splash.
-  ///  * [InkRipple.splashFactory], which defines a splash that spreads out
-  ///    more aggressively than the default.
   final InteractiveInkFeatureFactory? splashFactory;
 
   /// Called when the user taps the chip.
@@ -275,7 +261,8 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
     final style = widget.style ?? FlexiChipStyle.toned();
     final resolved = FlexiChipStyle.evaluate(style, widgetEvents.value);
     final result = FlexiChipStyle.from(resolved);
-    setState(() => this.style = result);
+    this.style = result;
+    setState(() {});
   }
 
   @protected
@@ -662,37 +649,38 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
   }
 
   setTheme() {
-    setState(() {
-      appTheme = Theme.of(context);
-    });
+    appTheme = Theme.of(context);
   }
 
   @override
   void initState() {
-    initWidgetEvents(widget.eventsController);
-    widgetEvents.toggle(FlexiChipEvent.disabled, widget.disabled);
-    widgetEvents.toggle(FlexiChipEvent.selected, widget.selected);
-    setStyle();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      initWidgetEvents(widget.eventsController);
+      widgetEvents.toggle(FlexiChipEvent.disabled, widget.disabled);
+      widgetEvents.toggle(FlexiChipEvent.selected, widget.selected);
       setTheme();
+      setStyle();
     });
     super.initState();
   }
 
   @override
   void didChangeDependencies() {
-    setTheme();
-    setStyle();
-    super.didChangeDependencies();
-    didUpdateWidget(widget);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setTheme();
+      super.didChangeDependencies();
+      didUpdateWidget(widget);
+    });
   }
 
   @override
   void didUpdateWidget(FlexiChip oldWidget) {
-    updateWidgetEvents(oldWidget.eventsController, widget.eventsController);
-    widgetEvents.toggle(FlexiChipEvent.disabled, widget.disabled);
-    widgetEvents.toggle(FlexiChipEvent.selected, widget.selected);
-    setStyle();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      updateWidgetEvents(oldWidget.eventsController, widget.eventsController);
+      widgetEvents.toggle(FlexiChipEvent.disabled, widget.disabled);
+      widgetEvents.toggle(FlexiChipEvent.selected, widget.selected);
+      setStyle();
+    });
     super.didUpdateWidget(oldWidget);
   }
 

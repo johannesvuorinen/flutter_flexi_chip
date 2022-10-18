@@ -7,7 +7,7 @@ typedef FlexiChipCheckmarkStyle = CheckmarkStyle;
 
 /// Signature for the function that returns a value
 /// of type [FlexiChipStyle] based on a given set of events.
-typedef FlexiChipStyleResolver = DrivenPropertyResolver<FlexiChipStyle?>;
+// typedef FlexiChipStyleResolver = DrivenPropertyResolver<FlexiChipStyle?>;
 
 /// Default chip's style.
 class FlexiChipStyle {
@@ -85,7 +85,7 @@ class FlexiChipStyle {
 
   /// Create an event driven chip's style using [callback].
   factory FlexiChipStyle.driven(
-    FlexiChipStyleResolver callback,
+    DrivenPropertyResolver<FlexiChipStyle?> callback,
   ) {
     return _DrivenFlexiChipStyle(callback);
   }
@@ -93,7 +93,7 @@ class FlexiChipStyle {
   /// Create a chip's style when some events occurs.
   ///
   /// The [enabled] is base style to be applied to the chip.
-  /// if [null] will fallback with empty FlexiChipStyle
+  /// if `null` will fallback with empty FlexiChipStyle
   ///
   /// The [selected] is style to be merged with [enabled],
   /// when events includes [FlexiChipEvent.selected].
@@ -550,8 +550,8 @@ class FlexiChipStyle {
 
   /// The style of this side of the chip's border.
   ///
-  /// To omit a side, set [style] to [BorderStyle.none].
-  /// This skips painting the border, but the border still has a [weight].
+  /// To omit a side, set [borderStyle] to [BorderStyle.none].
+  /// This skips painting the border, but the border still has a [borderWidth].
   final BorderStyle? borderStyle;
 
   /// Color to be used for the avatar's background.
@@ -727,7 +727,7 @@ class _DrivenFlexiChipStyle extends FlexiChipStyle
     implements DrivenProperty<FlexiChipStyle?> {
   _DrivenFlexiChipStyle(this._resolver) : super.from(_resolver({}));
 
-  final FlexiChipStyleResolver _resolver;
+  final DrivenPropertyResolver<FlexiChipStyle?> _resolver;
 
   @override
   FlexiChipStyle? resolve(Set<WidgetEvent> events) => _resolver(events);
