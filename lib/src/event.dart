@@ -67,4 +67,4 @@ abstract class FlexiChipEvent extends WidgetEvent {
 class FlexiChipEventController extends WidgetEventController {}
 
 /// Set of WidgetEvent
-typedef FlexiChipEvents = Set<WidgetEvent>;
+typedef FlexiChipEvents = WidgetEvents;

@@ -1,6 +1,6 @@
 name: flexi_chip
 description: Chip widget with smooth animation, event driven style, and many more.
-version: 1.0.2
+version: 1.0.3
 homepage: https://github.com/davigmacode/flutter_flexi_chip
 
 environment:
@@ -10,8 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  widget_event: ^1.2.3
-  animated_checkmark: ^1.0.0
+  widget_event: ^1.2.5
+  animated_checkmark: ^1.0.1
 
 dev_dependencies:
   flutter_test:

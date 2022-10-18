@@ -1,3 +1,8 @@
+## 1.0.3
+
+* Update dependencies
+* Change FlexiChipStyle.onEvent to FlexiChipStyle.when
+
 ## 1.0.2
 
 * Alias to extend for other package

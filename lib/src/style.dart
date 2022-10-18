@@ -87,10 +87,10 @@ class FlexiChipStyle {
   factory FlexiChipStyle.driven(
     FlexiChipStyleResolver callback,
   ) {
-    return _DrivenFlexiChipStyle.by(callback);
+    return _DrivenFlexiChipStyle(callback);
   }
 
-  /// Create a chip's style for each event.
+  /// Create a chip's style when some events occurs.
   ///
   /// The [enabled] is base style to be applied to the chip.
   /// if [null] will fallback with empty FlexiChipStyle
@@ -109,7 +109,7 @@ class FlexiChipStyle {
   ///
   /// The [pressed] style to be merged with [enabled],
   /// when events includes [FlexiChipEvent.pressed].
-  factory FlexiChipStyle.onEvent({
+  factory FlexiChipStyle.when({
     FlexiChipStyle? enabled,
     FlexiChipStyle? selected,
     FlexiChipStyle? disabled,
@@ -197,7 +197,7 @@ class FlexiChipStyle {
     FlexiChipStyle? focusedStyle,
     FlexiChipStyle? pressedStyle,
   }) {
-    return FlexiChipStyle.onEvent(
+    return FlexiChipStyle.when(
       enabled: FlexiChipStyle(
         height: height,
         margin: margin,
@@ -302,7 +302,7 @@ class FlexiChipStyle {
       elevation: 5,
     ),
   }) {
-    return FlexiChipStyle.onEvent(
+    return FlexiChipStyle.when(
       enabled: FlexiChipStyle(
         backgroundColor: color,
         borderColor: color,
@@ -403,7 +403,7 @@ class FlexiChipStyle {
     FlexiChipStyle? focusedStyle,
     FlexiChipStyle? pressedStyle,
   }) {
-    return FlexiChipStyle.onEvent(
+    return FlexiChipStyle.when(
       enabled: FlexiChipStyle(
         borderColor: color,
         foregroundColor: color,
@@ -454,7 +454,7 @@ class FlexiChipStyle {
     FlexiChipStyle? value,
     Set<WidgetEvent> events,
   ) {
-    return _DrivenFlexiChipStyle.evaluate(value, events);
+    return DrivenProperty.evaluate<FlexiChipStyle?>(value, events);
   }
 
   static const defaultClipBehavior = Clip.antiAlias;
@@ -723,29 +723,9 @@ class FlexiChipStyle {
   }
 }
 
-abstract class _DrivenFlexiChipStyle extends FlexiChipStyle
+class _DrivenFlexiChipStyle extends FlexiChipStyle
     implements DrivenProperty<FlexiChipStyle?> {
-  _DrivenFlexiChipStyle(FlexiChipStyle? style) : super.from(style);
-
-  @override
-  FlexiChipStyle? resolve(Set<WidgetEvent> events);
-
-  static FlexiChipStyle? evaluate(
-    FlexiChipStyle? value,
-    Set<WidgetEvent> events,
-  ) {
-    return DrivenProperty.evaluate<FlexiChipStyle?>(value, events);
-  }
-
-  static FlexiChipStyle by(
-    FlexiChipStyleResolver callback,
-  ) {
-    return _DrivenFlexiChipStyleBy(callback);
-  }
-}
-
-class _DrivenFlexiChipStyleBy extends _DrivenFlexiChipStyle {
-  _DrivenFlexiChipStyleBy(this._resolver) : super(_resolver({}));
+  _DrivenFlexiChipStyle(this._resolver) : super.from(_resolver({}));
 
   final FlexiChipStyleResolver _resolver;
 

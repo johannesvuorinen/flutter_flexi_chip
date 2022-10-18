@@ -845,6 +845,7 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
 
   @override
   void didChangeWidgetEvents() {
+    super.didChangeWidgetEvents();
     // print('${widget.label.toString()} ${widgetEvents.value.toString()}');
     didUpdateWidget(widget);
   }
