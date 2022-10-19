@@ -378,7 +378,7 @@ class FlexiChipStyle {
     Color? backgroundColor,
     double? backgroundOpacity = 0,
     int? backgroundAlpha,
-    double? borderOpacity,
+    double? borderOpacity = 1,
     int? borderAlpha,
     double? borderWidth = 1,
     BorderRadiusGeometry? borderRadius,
@@ -454,7 +454,8 @@ class FlexiChipStyle {
     FlexiChipStyle? value,
     Set<WidgetEvent> events,
   ) {
-    return DrivenProperty.evaluate<FlexiChipStyle?>(value, events);
+    return value
+        ?.merge(DrivenProperty.evaluate<FlexiChipStyle?>(value, events));
   }
 
   static const defaultClipBehavior = Clip.antiAlias;
@@ -638,8 +639,18 @@ class FlexiChipStyle {
     Color? iconColor,
     double? iconOpacity,
     double? iconSize,
+    FlexiChipStyle? selectedStyle,
+    FlexiChipStyle? disabledStyle,
+    FlexiChipStyle? hoveredStyle,
+    FlexiChipStyle? focusedStyle,
+    FlexiChipStyle? pressedStyle,
   }) {
-    return FlexiChipStyle(
+    final hasEvent = selectedStyle != null ||
+        disabledStyle != null ||
+        hoveredStyle != null ||
+        focusedStyle != null ||
+        pressedStyle != null;
+    final style = FlexiChipStyle(
       height: height ?? this.height,
       margin: margin ?? this.margin,
       padding: padding ?? this.padding,
@@ -677,6 +688,16 @@ class FlexiChipStyle {
       iconOpacity: iconOpacity ?? this.iconOpacity,
       iconSize: iconSize ?? this.iconSize,
     );
+    return hasEvent
+        ? FlexiChipStyle.when(
+            enabled: style,
+            selected: selectedStyle,
+            disabled: disabledStyle,
+            hovered: hoveredStyle,
+            focused: focusedStyle,
+            pressed: pressedStyle,
+          )
+        : style;
   }
 
   /// Creates a copy of this [FlexiChipStyle] but with
@@ -719,6 +740,21 @@ class FlexiChipStyle {
       iconColor: other.iconColor,
       iconOpacity: other.iconOpacity,
       iconSize: other.iconSize,
+      selectedStyle: other is _DrivenFlexiChipStyle
+          ? evaluate(other, {FlexiChipEvent.selected})
+          : null,
+      disabledStyle: other is _DrivenFlexiChipStyle
+          ? evaluate(other, {FlexiChipEvent.disabled})
+          : null,
+      hoveredStyle: other is _DrivenFlexiChipStyle
+          ? evaluate(other, {FlexiChipEvent.hovered})
+          : null,
+      focusedStyle: other is _DrivenFlexiChipStyle
+          ? evaluate(other, {FlexiChipEvent.focused})
+          : null,
+      pressedStyle: other is _DrivenFlexiChipStyle
+          ? evaluate(other, {FlexiChipEvent.pressed})
+          : null,
     );
   }
 }
