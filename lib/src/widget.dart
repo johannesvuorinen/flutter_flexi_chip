@@ -6,7 +6,7 @@ import 'style.dart';
 import 'event.dart';
 
 /// Chip widget with smooth animation, event driven style, and many more.
-class FlexiChip extends ImplicitlyAnimatedWidget {
+class FlexiChip extends StatelessWidget {
   const FlexiChip({
     Key? key,
     required this.label,
@@ -29,6 +29,270 @@ class FlexiChip extends ImplicitlyAnimatedWidget {
     this.onDeleted,
     this.onSelected,
     this.eventsController,
+    this.curve = Curves.linear,
+    this.duration = FlexiChip.defaultDuration,
+  }) : super(key: key);
+
+  /// The primary content of the chip.
+  ///
+  /// Typically a [Text] widget.
+  final Widget label;
+
+  /// Typically used as profile image.
+  ///
+  /// If the avatar is to have the user's initials, use [avatarText] instead.
+  final ImageProvider? avatarImage;
+
+  /// The primary content of the chip avatar.
+  ///
+  /// Typically a [Text] widget.
+  final Widget? avatarText;
+
+  /// A custom widget to display prior to the chip's [label].
+  final Widget? leading;
+
+  /// A custom widget to display next to the chip's [label].
+  final Widget? trailing;
+
+  /// Tooltip string to be used for the body area (where the label and avatar
+  /// are) of the chip.
+  final String? tooltip;
+
+  /// The icon displayed when [onDeleted] is set.
+  ///
+  /// Defaults to an [Icon] widget set to use [Icons.cancel].
+  final Widget? deleteIcon;
+
+  /// The message to be used for the chip's delete button tooltip.
+  ///
+  /// If provided with an empty string, the tooltip of the delete button will be
+  /// disabled.
+  ///
+  /// If null, the default [MaterialLocalizations.deleteButtonTooltip] will be
+  /// used.
+  final String? deleteTooltip;
+
+  /// Whether or not this chip is selected.
+  ///
+  /// If [onSelected] is not null, this value will be used to determine if the
+  /// select checkmark will be shown or not.
+  ///
+  /// Must not be null. Defaults to false.
+  final bool selected;
+
+  /// Whether or not this chip is disabled for input.
+  ///
+  /// Defaults to false. Cannot be null.
+  final bool disabled;
+
+  /// Whether or not to show a checkmark when [selected] is true.
+  ///
+  /// Defaults to false. Cannot ve null.
+  final bool checkmark;
+
+  /// True if this widget will be selected as the initial focus
+  /// when no other node in its scope is currently focused.
+  ///
+  /// Ideally, there is only one widget with autofocus set in each [FocusScope].
+  /// If there is more than one widget with autofocus set,
+  /// then the first one added to the tree will get focus.
+  ///
+  /// Must not be null. Defaults to false.
+  final bool autofocus;
+
+  /// An optional focus node to use as the focus node for this widget.
+  ///
+  /// If one is not supplied, then one will be automatically allocated, owned,
+  /// and managed by this widget. The widget will be focusable even if a [focusNode] is not supplied.
+  /// If supplied, the given focusNode will be hosted by this widget, but not owned.
+  /// See [FocusNode] for more information on what being hosted and/or owned implies.
+  ///
+  /// Supplying a focus node is sometimes useful if an ancestor
+  /// to this widget wants to control when this widget has the focus.
+  /// The owner will be responsible for calling [FocusNode.dispose]
+  /// on the focus node when it is done with it, but this widget
+  /// will attach/detach and reparent the node when needed.
+  final FocusNode? focusNode;
+
+  /// The splash color of the ink response. If this property is null then the
+  /// splash color of the theme, [ThemeData.splashColor], will be used.
+  final Color? splashColor;
+
+  /// Defines the appearance of the splash.
+  ///
+  /// Defaults to the value of the theme's splash factory: [ThemeData.splashFactory].
+  final InteractiveInkFeatureFactory? splashFactory;
+
+  /// Called when the user taps the chip.
+  ///
+  /// If [onPressed] is set, then this callback will be called when the user
+  /// taps on the label or avatar parts of the chip. If [onPressed] is null,
+  /// then the chip will be disabled.
+  ///
+  /// {@tool snippet}
+  ///
+  /// ```dart
+  /// class Blacksmith extends StatelessWidget {
+  ///   const Blacksmith({Key? key}) : super(key: key);
+  ///
+  ///   void startHammering() {
+  ///     print('bang bang bang');
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return FlexiChip(
+  ///       label: const Text('Apply Hammer'),
+  ///       onPressed: startHammering,
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
+  final VoidCallback? onPressed;
+
+  /// Called when the user taps the [deleteIcon] to delete the chip.
+  ///
+  /// If null, the delete button will not appear on the chip.
+  ///
+  /// The chip will not automatically remove itself: this just tells the app
+  /// that the user tapped the delete button.
+  final VoidCallback? onDeleted;
+
+  /// Called when the chip should change between selected and de-selected
+  /// states.
+  ///
+  /// When the chip is tapped, then the [onSelected] callback, if set, will be
+  /// applied to `!selected` (see [selected]).
+  ///
+  /// The chip passes the new value to the callback but does not actually
+  /// change state until the parent widget rebuilds the chip with the new
+  /// value.
+  ///
+  /// The callback provided to [onSelected] should update the state of the
+  /// parent [StatefulWidget] using the [State.setState] method, so that the
+  /// parent gets rebuilt.
+  ///
+  /// The [onSelected] and [onPressed] callbacks must not
+  /// both be specified at the same time.
+  ///
+  /// {@tool snippet}
+  ///
+  /// A [StatefulWidget] that illustrates use of onSelected in an [InputChip].
+  ///
+  /// ```dart
+  /// class Wood extends StatefulWidget {
+  ///   const Wood({Key? key}) : super(key: key);
+  ///
+  ///   @override
+  ///   State<StatefulWidget> createState() => WoodState();
+  /// }
+  ///
+  /// class WoodState extends State<Wood> {
+  ///   bool _useChisel = false;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return FlexiChip(
+  ///       label: const Text('Use Chisel'),
+  ///       selected: _useChisel,
+  ///       onSelected: (bool newValue) {
+  ///         setState(() {
+  ///           _useChisel = newValue;
+  ///         });
+  ///       },
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
+  final ValueChanged<bool>? onSelected;
+
+  /// The style to be applied to the chip.
+  ///
+  /// If [style] is an event driven [FlexiChipStyle]
+  /// by [FlexiChipStyle.driven], then [FlexiChipStyle.evaluate]
+  /// is used for the following [FlexiChipEvent]s:
+  ///
+  ///  * [FlexiChipEvent.disabled].
+  ///  * [FlexiChipEvent.selected].
+  ///  * [FlexiChipEvent.hovered].
+  ///  * [FlexiChipEvent.focused].
+  ///  * [FlexiChipEvent.pressed].
+  final FlexiChipStyle? style;
+
+  /// Used by widgets that expose their internal event
+  /// for the sake of extensions that add support for additional events.
+  final FlexiChipEventController? eventsController;
+
+  final Curve curve;
+  final Duration duration;
+
+  static const defaultDuration = Duration(milliseconds: 200);
+
+  bool get enabled => !disabled;
+
+  bool get canTap => enabled && hasCallback;
+
+  bool get canDelete => onDeleted != null;
+
+  bool get hasCallback {
+    return onPressed != null || onSelected != null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _FlexiChipRender(
+      label: label,
+      avatarImage: avatarImage,
+      avatarText: avatarText,
+      leading: leading,
+      trailing: trailing,
+      tooltip: tooltip,
+      deleteIcon: deleteIcon,
+      deleteTooltip: deleteTooltip,
+      style: style,
+      selected: selected,
+      disabled: disabled,
+      checkmark: checkmark,
+      autofocus: autofocus,
+      focusNode: focusNode,
+      splashColor: splashColor,
+      splashFactory: splashFactory,
+      onPressed: onPressed,
+      onDeleted: onDeleted,
+      onSelected: onSelected,
+      eventsController: eventsController,
+      theme: Theme.of(context),
+    );
+  }
+}
+
+/// Chip widget with smooth animation, event driven style, and many more.
+class _FlexiChipRender extends ImplicitlyAnimatedWidget {
+  const _FlexiChipRender({
+    Key? key,
+    required this.label,
+    this.avatarImage,
+    this.avatarText,
+    this.leading,
+    this.trailing,
+    this.tooltip,
+    this.deleteIcon,
+    this.deleteTooltip,
+    this.style,
+    this.selected = false,
+    this.disabled = false,
+    this.checkmark = false,
+    this.autofocus = false,
+    this.focusNode,
+    this.splashColor,
+    this.splashFactory,
+    this.onPressed,
+    this.onDeleted,
+    this.onSelected,
+    this.eventsController,
+    required this.theme,
     Curve curve = Curves.linear,
     Duration duration = FlexiChip.defaultDuration,
   }) : super(
@@ -229,6 +493,8 @@ class FlexiChip extends ImplicitlyAnimatedWidget {
   /// for the sake of extensions that add support for additional events.
   final FlexiChipEventController? eventsController;
 
+  final ThemeData theme;
+
   static const defaultDuration = Duration(milliseconds: 200);
 
   bool get enabled => !disabled;
@@ -242,12 +508,12 @@ class FlexiChip extends ImplicitlyAnimatedWidget {
   }
 
   @override
-  FlexiChipState createState() => FlexiChipState();
+  _FlexiChipRenderState createState() => _FlexiChipRenderState();
 }
 
-class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
-    with WidgetEventMixin<FlexiChip> {
-  ThemeData appTheme = ThemeData();
+class _FlexiChipRenderState extends AnimatedWidgetBaseState<_FlexiChipRender>
+    with WidgetEventMixin<_FlexiChipRender> {
+  // ThemeData appTheme = ThemeData();
 
   FlexiChipStyle style = const FlexiChipStyle();
 
@@ -288,28 +554,28 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
 
   Color get defaultBackgroundColor {
     return widget.selected
-        ? appTheme.brightness == Brightness.light
-            ? appTheme.colorScheme.primary
-            : appTheme.colorScheme.inversePrimary
+        ? widget.theme.brightness == Brightness.light
+            ? widget.theme.colorScheme.primary
+            : widget.theme.colorScheme.inversePrimary
         : isOutlined
-            ? appTheme.colorScheme.surface
-            : appTheme.unselectedWidgetColor;
+            ? widget.theme.colorScheme.surface
+            : widget.theme.unselectedWidgetColor;
   }
 
   Color get defaultBorderColor {
     return widget.selected
-        ? appTheme.colorScheme.primary
-        : appTheme.colorScheme.outline;
+        ? widget.theme.colorScheme.primary
+        : widget.theme.colorScheme.outline;
   }
 
   Color get defaultForegroundColor {
     return isFilled
         ? widget.disabled
-            ? appTheme.colorScheme.onSurface
+            ? widget.theme.colorScheme.onSurface
             : estimateSurfaceColor(backgroundColor)!
         : widget.selected
-            ? appTheme.colorScheme.primary
-            : appTheme.colorScheme.onSurface;
+            ? widget.theme.colorScheme.primary
+            : widget.theme.colorScheme.onSurface;
   }
 
   Color get backgroundColor {
@@ -353,7 +619,7 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
   }
 
   Color get containerShadowColor {
-    return style.shadowColor ?? appTheme.colorScheme.shadow;
+    return style.shadowColor ?? widget.theme.colorScheme.shadow;
   }
 
   ShapeBorder get containerBorder {
@@ -367,28 +633,28 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
     );
   }
 
-  BoxDecoration get containerDecoration {
-    return BoxDecoration(
-      color: backgroundColor,
-      border: Border.all(
-        color: borderColor,
-        width: style.borderWidth ?? FlexiChipStyle.defaultBorderWidth,
-        style: style.borderStyle ?? FlexiChipStyle.defaultBorderStyle,
-      ),
-      borderRadius: style.borderRadius,
-    );
-  }
+  // BoxDecoration get containerDecoration {
+  //   return BoxDecoration(
+  //     color: backgroundColor,
+  //     border: Border.all(
+  //       color: borderColor,
+  //       width: style.borderWidth ?? FlexiChipStyle.defaultBorderWidth,
+  //       style: style.borderStyle ?? FlexiChipStyle.defaultBorderStyle,
+  //     ),
+  //     borderRadius: style.borderRadius,
+  //   );
+  // }
 
   TextStyle get foregroundStyle {
     return const TextStyle()
-        .merge(appTheme.chipTheme.labelStyle)
+        .merge(widget.theme.chipTheme.labelStyle)
         // .merge(defaultTheme.labelStyle)
         .copyWith(color: foregroundColor)
         .merge(style.foregroundStyle);
   }
 
   Color get avatarBackgroundColor {
-    final color = style.avatarBackgroundColor ?? borderColor;
+    final color = style.avatarBackgroundColor ?? foregroundColor;
     return isFilled ? foregroundColor.withOpacity(.7) : color;
   }
 
@@ -479,11 +745,11 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
     return _containerBorderTween?.evaluate(animation) ?? containerBorder;
   }
 
-  DecorationTween? _containerDecorationTween;
-  Decoration get animatedContainerDecoration {
-    return _containerDecorationTween?.evaluate(animation) ??
-        containerDecoration;
-  }
+  // DecorationTween? _containerDecorationTween;
+  // Decoration get animatedContainerDecoration {
+  //   return _containerDecorationTween?.evaluate(animation) ??
+  //       containerDecoration;
+  // }
 
   EdgeInsetsGeometryTween? _containerPaddingTween;
   EdgeInsetsGeometry get animatedContainerPadding {
@@ -648,9 +914,9 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
     widgetEvents.toggle(FlexiChipEvent.focused, value);
   }
 
-  setTheme() {
-    appTheme = Theme.of(context);
-  }
+  // setTheme() {
+  //   if (mounted) appTheme = Theme.of(context);
+  // }
 
   @override
   void initState() {
@@ -658,7 +924,7 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
       initWidgetEvents(widget.eventsController);
       widgetEvents.toggle(FlexiChipEvent.disabled, widget.disabled);
       widgetEvents.toggle(FlexiChipEvent.selected, widget.selected);
-      setTheme();
+      // setTheme();
       setStyle();
     });
     super.initState();
@@ -667,20 +933,18 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
   @override
   void didChangeDependencies() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      setTheme();
+      // setTheme();
       super.didChangeDependencies();
       didUpdateWidget(widget);
     });
   }
 
   @override
-  void didUpdateWidget(FlexiChip oldWidget) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      updateWidgetEvents(oldWidget.eventsController, widget.eventsController);
-      widgetEvents.toggle(FlexiChipEvent.disabled, widget.disabled);
-      widgetEvents.toggle(FlexiChipEvent.selected, widget.selected);
-      setStyle();
-    });
+  void didUpdateWidget(_FlexiChipRender oldWidget) {
+    updateWidgetEvents(oldWidget.eventsController, widget.eventsController);
+    widgetEvents.toggle(FlexiChipEvent.disabled, widget.disabled);
+    widgetEvents.toggle(FlexiChipEvent.selected, widget.selected);
+    setStyle();
     super.didUpdateWidget(oldWidget);
   }
 
@@ -716,11 +980,11 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
       (value) => ColorTween(begin: value),
     ) as ColorTween?;
 
-    _containerDecorationTween = visitor(
-      _containerDecorationTween,
-      containerDecoration,
-      (value) => DecorationTween(begin: value),
-    ) as DecorationTween?;
+    // _containerDecorationTween = visitor(
+    //   _containerDecorationTween,
+    //   containerDecoration,
+    //   (value) => DecorationTween(begin: value),
+    // ) as DecorationTween?;
 
     _containerShadowColorTween = visitor(
       _containerShadowColorTween,
@@ -851,8 +1115,6 @@ class FlexiChipState extends AnimatedWidgetBaseState<FlexiChip>
         child: ChipContainer(
           color: animatedContainerColor,
           clipBehavior: containerClipBehavior,
-          borderRadius: animatedContainerRadius,
-          decoration: animatedContainerDecoration,
           shape: animatedContainerBorder,
           shadowColor: animatedContainerShadowColor,
           elevation: animatedContainerElevation,

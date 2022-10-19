@@ -66,11 +66,42 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
-    final style = FlexiChipStyle.filled();
-    log('${style.elevation}', name: 'style');
+    // final style = FlexiChipStyle.filled();
+    // log('${style.backgroundOpacity}', name: 'style');
 
-    final evaluated = FlexiChipStyle.evaluate(style, {FlexiChipEvent.pressed});
-    log('${evaluated?.elevation}', name: 'style evaluated');
+    // const style = FlexiChipStyle(margin: EdgeInsets.all(5));
+    // log('${style.margin}', name: 'style');
+
+    // final merged = style.merge(FlexiChipStyle.outlined(
+    //   margin: EdgeInsets.zero,
+    //   pressedStyle: const FlexiChipStyle(
+    //     margin: EdgeInsets.all(10),
+    //   ),
+    // ));
+    // log('${merged.margin}', name: 'style merged');
+
+    // final evaluated = FlexiChipStyle.evaluate(merged, {FlexiChipEvent.pressed});
+    // log('${evaluated?.margin}', name: 'style pressed');
+
+    final style = FlexiChipStyle.when(
+      enabled: FlexiChipStyle.outlined(),
+      selected: FlexiChipStyle.filled(),
+    );
+    log('${style.backgroundAlpha}', name: 'style');
+
+    final selected = FlexiChipStyle.evaluate(style, {
+      FlexiChipEvent.disabled,
+      FlexiChipEvent.selected,
+    });
+    log('${selected?.backgroundAlpha}', name: 'style selected');
+
+    // final merged = style.merge(FlexiChipStyle.outlined(
+    //   margin: EdgeInsets.zero,
+    //   pressedStyle: const FlexiChipStyle(
+    //     margin: EdgeInsets.all(10),
+    //   ),
+    // ));
+    // log('${merged.margin}', name: 'style merged');
   }
 
   @override
@@ -154,6 +185,38 @@ class _MyHomePageState extends State<MyHomePage> {
                   selected: _selected,
                   onDeleted: () {},
                   disabled: true,
+                ),
+              ],
+            ),
+            Wrap(
+              spacing: 10,
+              children: [
+                FlexiChip(
+                  label: const Text('Mixed Style Chip'),
+                  avatarText: const Text('FC'),
+                  style: FlexiChipStyle.when(
+                    enabled: FlexiChipStyle.toned(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    selected: FlexiChipStyle.filled(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+                  selected: _selected,
+                  onSelected: _setSelected,
+                  checkmark: true,
+                  onDeleted: () {},
+                ),
+                FlexiChip(
+                  label: const Text('Mixed Style Chip'),
+                  leading: const Icon(Icons.image),
+                  style: FlexiChipStyle.filled(
+                    selectedStyle: FlexiChipStyle.outlined(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                  selected: _selected,
+                  onDeleted: () {},
                 ),
               ],
             ),

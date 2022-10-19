@@ -5,43 +5,69 @@ class ChipContainer extends StatelessWidget {
     Key? key,
     required this.child,
     required this.height,
-    required this.decoration,
-    required this.shadowColor,
-    required this.color,
-    required this.shape,
-    this.borderRadius,
+    this.color,
+    this.shape,
+    this.shadowColor = const Color(0xFF000000),
     this.clipBehavior = Clip.antiAlias,
     this.elevation = 0.0,
   }) : super(key: key);
 
   final Widget child;
   final double height;
-  final Decoration decoration;
+  final Color? color;
   final Color shadowColor;
-  final Color color;
-  final ShapeBorder shape;
-  final BorderRadiusGeometry? borderRadius;
-  final Clip clipBehavior;
   final double elevation;
+  final ShapeBorder? shape;
+  final Clip clipBehavior;
 
   @override
   Widget build(BuildContext context) {
+    final textDirection = Directionality.maybeOf(context);
+    final borderClipper = shape == null
+        ? null
+        : ShapeBorderClipper(
+            textDirection: textDirection,
+            shape: shape!,
+          );
+
+    Widget contents = SizedBox(
+      height: height,
+      child: child,
+    );
+
+    if (shape != null) {
+      contents = ShapeBorderPaint(
+        shape: shape!,
+        textDirection: textDirection,
+        child: contents,
+      );
+    }
+
+    if (color == null) {
+      return ClipPath(
+        clipper: borderClipper,
+        clipBehavior: clipBehavior,
+        child: contents,
+      );
+    }
+
+    if (shape == null) {
+      return PhysicalModel(
+        color: color!,
+        elevation: elevation,
+        shadowColor: shadowColor,
+        clipBehavior: clipBehavior,
+        child: contents,
+      );
+    }
+
     return PhysicalShape(
-      color: color,
-      clipBehavior: clipBehavior,
-      shadowColor: shadowColor,
+      color: color!,
       elevation: elevation,
-      clipper: ShapeBorderClipper(
-        textDirection: Directionality.maybeOf(context),
-        shape: shape,
-      ),
-      child: ShapeBorderPaint(
-        shape: shape,
-        child: SizedBox(
-          height: height,
-          child: child,
-        ),
-      ),
+      shadowColor: shadowColor,
+      clipBehavior: clipBehavior,
+      clipper: borderClipper!,
+      child: contents,
     );
   }
 }
@@ -51,39 +77,38 @@ class ShapeBorderPaint extends StatelessWidget {
     Key? key,
     required this.child,
     required this.shape,
+    this.textDirection,
     this.isForeground = true,
   }) : super(key: key);
 
   final Widget child;
   final ShapeBorder shape;
+  final TextDirection? textDirection;
   final bool isForeground;
 
   @override
   Widget build(BuildContext context) {
+    final painter = ShapeBorderPainter(shape, textDirection);
     return CustomPaint(
-      painter: isForeground
-          ? null
-          : ShapeBorderPainter(shape, Directionality.maybeOf(context)),
-      foregroundPainter: isForeground
-          ? ShapeBorderPainter(shape, Directionality.maybeOf(context))
-          : null,
+      painter: isForeground ? null : painter,
+      foregroundPainter: isForeground ? painter : null,
       child: child,
     );
   }
 }
 
 class ShapeBorderPainter extends CustomPainter {
-  ShapeBorderPainter(this.border, this.textDirection);
-  final ShapeBorder border;
+  ShapeBorderPainter(this.shape, this.textDirection);
+  final ShapeBorder shape;
   final TextDirection? textDirection;
 
   @override
   void paint(Canvas canvas, Size size) {
-    border.paint(canvas, Offset.zero & size, textDirection: textDirection);
+    shape.paint(canvas, Offset.zero & size, textDirection: textDirection);
   }
 
   @override
   bool shouldRepaint(ShapeBorderPainter oldDelegate) {
-    return oldDelegate.border != border;
+    return oldDelegate.shape != shape;
   }
 }
