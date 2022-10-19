@@ -1,3 +1,9 @@
+## 1.0.6
+
+* Fixed default style flicker
+* Fixed call animation stop after dispose
+* Fixed chip margin
+
 ## 1.0.5
 
 * Driven style can merge

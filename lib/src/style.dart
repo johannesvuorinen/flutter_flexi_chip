@@ -462,6 +462,7 @@ class FlexiChipStyle {
   static const defaultBorderWidth = 1.0;
   static const defaultBorderStyle = BorderStyle.solid;
   static const defaultBorderRadius = BorderRadius.all(Radius.circular(8));
+  static const defaultMargin = EdgeInsets.zero;
   static const defaultPadding = EdgeInsets.symmetric(horizontal: 8);
   static const defaultPaddingWithAvatar = EdgeInsets.symmetric(horizontal: 4);
   static const defaultAvatarSize = Size.square(24);
