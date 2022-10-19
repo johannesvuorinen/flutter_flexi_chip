@@ -1,3 +1,9 @@
+## 1.0.5
+
+* Driven style can merge
+* Improve container
+* Fixed theme flickering
+
 ## 1.0.4
 
 * Fixed theme flickering

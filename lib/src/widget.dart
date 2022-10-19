@@ -495,7 +495,7 @@ class _FlexiChipRender extends ImplicitlyAnimatedWidget {
 
   final ThemeData theme;
 
-  static const defaultDuration = Duration(milliseconds: 200);
+  // static const defaultDuration = Duration(milliseconds: 200);
 
   bool get enabled => !disabled;
 
