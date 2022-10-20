@@ -193,7 +193,7 @@ class _MyHomePageState extends State<MyHomePage> {
               children: [
                 FlexiChip(
                   label: const Text('Mixed Style Chip'),
-                  avatarText: const Text('FC'),
+                  avatarImage: const NetworkImage('https://i.pravatar.cc/50'),
                   style: FlexiChipStyle.when(
                     enabled: FlexiChipStyle.toned(
                       borderRadius: BorderRadius.circular(25),

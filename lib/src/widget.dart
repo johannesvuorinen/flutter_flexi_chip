@@ -676,7 +676,7 @@ class _FlexiChipRenderState extends AnimatedWidgetBaseState<_FlexiChipRender>
             decoration: animatedAvatarDecoration,
             border: animatedAvatarBorder,
             size: animatedAvatarSize,
-            child: checkmark ?? widget.avatarText!,
+            child: checkmark ?? widget.avatarText,
           )
         : checkmark;
 
