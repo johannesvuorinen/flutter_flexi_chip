@@ -1,3 +1,7 @@
+## 1.0.7
+
+* Fixed nulled avatarText while avatarImage is filled
+
 ## 1.0.6
 
 * Fixed default style flicker
