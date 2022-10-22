@@ -1,3 +1,7 @@
+## 1.0.8
+
+* Improved styling
+
 ## 1.0.7
 
 * Fixed nulled avatarText while avatarImage is filled

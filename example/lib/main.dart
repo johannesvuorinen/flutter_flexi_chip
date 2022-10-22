@@ -64,44 +64,33 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
+    const style = FlexiChipStyle(margin: EdgeInsets.all(5));
+    log('${style.margin}', name: 'style initial');
+
+    final merged = style.merge(FlexiChipStyle.outlined(
+      margin: EdgeInsets.zero,
+      pressedStyle: const FlexiChipStyle(
+        margin: EdgeInsets.all(10),
+      ),
+    ));
+    log('${merged.margin}', name: 'style merged');
+
+    final evaluated = FlexiChipStyle.evaluate(merged, {FlexiChipEvent.pressed});
+    log('${evaluated?.margin}', name: 'style pressed');
+
+    // final style = FlexiChipStyle.when(
+    //   enabled: FlexiChipStyle.outlined(),
+    //   selected: FlexiChipStyle.filled(),
+    // );
+    // log('${style.backgroundAlpha}', name: 'style');
+
+    // final selected = FlexiChipStyle.evaluate(style, {
+    //   FlexiChipEvent.disabled,
+    //   FlexiChipEvent.selected,
+    // });
+    // log('${selected?.backgroundAlpha}', name: 'style selected');
+
     super.initState();
-
-    // final style = FlexiChipStyle.filled();
-    // log('${style.backgroundOpacity}', name: 'style');
-
-    // const style = FlexiChipStyle(margin: EdgeInsets.all(5));
-    // log('${style.margin}', name: 'style');
-
-    // final merged = style.merge(FlexiChipStyle.outlined(
-    //   margin: EdgeInsets.zero,
-    //   pressedStyle: const FlexiChipStyle(
-    //     margin: EdgeInsets.all(10),
-    //   ),
-    // ));
-    // log('${merged.margin}', name: 'style merged');
-
-    // final evaluated = FlexiChipStyle.evaluate(merged, {FlexiChipEvent.pressed});
-    // log('${evaluated?.margin}', name: 'style pressed');
-
-    final style = FlexiChipStyle.when(
-      enabled: FlexiChipStyle.outlined(),
-      selected: FlexiChipStyle.filled(),
-    );
-    log('${style.backgroundAlpha}', name: 'style');
-
-    final selected = FlexiChipStyle.evaluate(style, {
-      FlexiChipEvent.disabled,
-      FlexiChipEvent.selected,
-    });
-    log('${selected?.backgroundAlpha}', name: 'style selected');
-
-    // final merged = style.merge(FlexiChipStyle.outlined(
-    //   margin: EdgeInsets.zero,
-    //   pressedStyle: const FlexiChipStyle(
-    //     margin: EdgeInsets.all(10),
-    //   ),
-    // ));
-    // log('${merged.margin}', name: 'style merged');
   }
 
   @override

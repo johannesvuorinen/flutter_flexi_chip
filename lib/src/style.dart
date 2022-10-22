@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:widget_event/widget_event.dart';
 import 'package:animated_checkmark/animated_checkmark.dart';
+import 'dart:ui';
 import 'event.dart';
 
 typedef FlexiChipCheckmarkStyle = CheckmarkStyle;
@@ -271,7 +272,7 @@ class FlexiChipStyle {
     double? foregroundOpacity,
     int? foregroundAlpha,
     double? foregroundSpacing,
-    double? backgroundOpacity = 1,
+    double? backgroundOpacity = .8,
     int? backgroundAlpha,
     double? borderOpacity = 0,
     int? borderAlpha,
@@ -474,6 +475,9 @@ class FlexiChipStyle {
   static const disabledForegroundAlpha = 0x61; // 38%
   static const disabledBackgroundAlpha = 0x0c; // 38% * 12% = 5%
   static const disabledBorderAlpha = 0x0c; // 38% * 12% = 5%
+  static const colorTransparent = Color(0x00000000);
+  static const colorBlack = Color(0xFF000000);
+  static const colorWhite = Color(0xFFFFFFFF);
 
   /// Defaults to [FlexiChipStyle.defaultHeight]
   final double? height;
@@ -603,6 +607,38 @@ class FlexiChipStyle {
   ///
   /// Defaults to [FlexiChipStyle.defaultIconSize].
   final double? iconSize;
+
+  /// Whether the chip's has outline or not
+  bool get isOutlined {
+    final width = borderWidth;
+    return borderStyle == BorderStyle.solid && width != null && width >= 1;
+  }
+
+  /// Whether the chip's has solid background color or not
+  bool get isFilled {
+    Color? color = backgroundColor;
+    final opacity = backgroundOpacity;
+    final alpha = backgroundAlpha;
+
+    const kOpacityThreshold = 0.4;
+    const kAlphaThreshold = 102;
+
+    if (color != null) {
+      color = colorWithOpacity(color, opacity);
+      color = colorWithAlpha(color, alpha);
+      final colorIsNotTransparent = color != colorTransparent;
+      final colorIsSolid = color.opacity > kOpacityThreshold;
+      return colorIsNotTransparent && colorIsSolid;
+    }
+
+    final isSolidByOpacity = opacity != null && opacity > kOpacityThreshold;
+    final isSolidByAlpha = alpha != null && alpha > kAlphaThreshold;
+
+    return isSolidByOpacity || isSolidByAlpha;
+  }
+
+  /// Whether the chip's has toned background color or not
+  bool get isToned => !isFilled;
 
   /// Creates a copy of this [FlexiChipStyle] but with
   /// the given fields replaced with the new values.
@@ -757,6 +793,62 @@ class FlexiChipStyle {
           ? evaluate(other, {FlexiChipEvent.pressed})
           : null,
     );
+  }
+
+  /// Determines whether the given [Color] is [Brightness.light] or
+  /// [Brightness.dark].
+  ///
+  /// This compares the luminosity and opacity of the given color
+  /// to a threshold value that matches the material design specification.
+  static Brightness? brightnessFor(Color? color) {
+    if (color == null) return null;
+
+    // See <https://www.w3.org/TR/WCAG20/#contrast-ratiodef>
+    // The spec says to use kThreshold=0.0525, but Material Design appears to bias
+    // more towards using light text than WCAG20 recommends. Material Design spec
+    // doesn't say what value to use, but 0.15 seemed close to what the Material
+    // Design spec shows for its color palette on
+    // <https://material.io/go/design-theming#color-color-palette>.
+    const kLuminanceThreshold = 0.15;
+    const kOpaqueThreshold = 0.6;
+
+    final relativeLuminance = color.computeLuminance();
+    final luminance = (relativeLuminance + 0.05) * (relativeLuminance + 0.05);
+    final isLight = luminance > kLuminanceThreshold;
+    final isOpaque = color.opacity > kOpaqueThreshold;
+
+    return isLight
+        ? isOpaque
+            ? Brightness.light
+            : Brightness.dark
+        : isOpaque
+            ? Brightness.dark
+            : Brightness.light;
+  }
+
+  /// Estimate foreground color on surface
+  static Color? colorOnSurface(
+    Color? surface, [
+    Color? onLight = colorBlack,
+    Color? onDark = colorWhite,
+  ]) {
+    if (surface == null) return null;
+    final brightness = brightnessFor(surface);
+    return brightness == Brightness.light ? onLight : onDark;
+  }
+
+  /// Returns a new color that matches this color
+  /// with the alpha channel replaced with
+  /// the given opacity (which ranges from 0.0 to 1.0).
+  static Color colorWithOpacity(Color color, double? opacity) {
+    return opacity != null ? color.withOpacity(opacity) : color;
+  }
+
+  /// Returns a new color that matches this color
+  /// with the alpha channel replaced
+  /// with a (which ranges from 0 to 255).
+  static Color colorWithAlpha(Color color, int? alpha) {
+    return alpha != null ? color.withAlpha(alpha) : color;
   }
 }
 

@@ -344,11 +344,6 @@ class _FlexiChipRenderState extends AnimatedWidgetBaseState<_FlexiChipRender>
     with WidgetEventMixin<_FlexiChipRender> {
   FlexiChipStyle style = const FlexiChipStyle();
 
-  bool get isFilled => style.backgroundOpacity == 1;
-  bool get isOutlined =>
-      style.backgroundOpacity == 0 ||
-      style.backgroundColor == Colors.transparent;
-
   @protected
   void setStyle() {
     final style = widget.style ?? FlexiChipStyle.toned();
@@ -358,33 +353,12 @@ class _FlexiChipRenderState extends AnimatedWidgetBaseState<_FlexiChipRender>
     setState(() {});
   }
 
-  @protected
-  Color colorWithOpacity(Color color, double? opacity) {
-    return opacity != null ? color.withOpacity(opacity) : color;
-  }
-
-  @protected
-  Color colorWithAlpha(Color color, int? alpha) {
-    return alpha != null ? color.withAlpha(alpha) : color;
-  }
-
-  @protected
-  Color? estimateSurfaceColor(
-    Color? background, [
-    Color? onLight = Colors.black,
-    Color? onDark = Colors.white,
-  ]) {
-    if (background == null) return null;
-    final brightness = ThemeData.estimateBrightnessForColor(background);
-    return brightness == Brightness.dark ? onDark : onLight;
-  }
-
   Color get defaultBackgroundColor {
     return widget.selected
         ? widget.theme.brightness == Brightness.light
             ? widget.theme.colorScheme.primary
             : widget.theme.colorScheme.inversePrimary
-        : isOutlined
+        : style.isOutlined
             ? widget.theme.colorScheme.surface
             : widget.theme.unselectedWidgetColor;
   }
@@ -396,34 +370,34 @@ class _FlexiChipRenderState extends AnimatedWidgetBaseState<_FlexiChipRender>
   }
 
   Color get defaultForegroundColor {
-    return isFilled
-        ? widget.disabled
-            ? widget.theme.colorScheme.onSurface
-            : estimateSurfaceColor(backgroundColor)!
+    return style.isFilled
+        ? widget.selected && widget.disabled
+            ? widget.theme.colorScheme.primary
+            : FlexiChipStyle.colorOnSurface(backgroundColor)!
         : widget.selected
             ? widget.theme.colorScheme.primary
             : widget.theme.colorScheme.onSurface;
   }
 
   Color get backgroundColor {
-    final color = style.backgroundColor ?? defaultBackgroundColor;
-    final withOpacity = colorWithOpacity(color, style.backgroundOpacity);
-    final withAlpha = colorWithAlpha(withOpacity, style.backgroundAlpha);
-    return withAlpha;
+    Color color = style.backgroundColor ?? defaultBackgroundColor;
+    color = FlexiChipStyle.colorWithOpacity(color, style.backgroundOpacity);
+    color = FlexiChipStyle.colorWithAlpha(color, style.backgroundAlpha);
+    return color;
   }
 
   Color get borderColor {
-    final color = style.borderColor ?? defaultBorderColor;
-    final withOpacity = colorWithOpacity(color, style.borderOpacity);
-    final withAlpha = colorWithAlpha(withOpacity, style.borderAlpha);
-    return withAlpha;
+    Color color = style.borderColor ?? defaultBorderColor;
+    color = FlexiChipStyle.colorWithOpacity(color, style.borderOpacity);
+    color = FlexiChipStyle.colorWithAlpha(color, style.borderAlpha);
+    return color;
   }
 
   Color get foregroundColor {
-    final color = style.foregroundColor ?? defaultForegroundColor;
-    final withOpacity = colorWithOpacity(color, style.foregroundOpacity);
-    final withAlpha = colorWithAlpha(withOpacity, style.foregroundAlpha);
-    return withAlpha;
+    Color color = style.foregroundColor ?? defaultForegroundColor;
+    color = FlexiChipStyle.colorWithOpacity(color, style.foregroundOpacity);
+    color = FlexiChipStyle.colorWithAlpha(color, style.foregroundAlpha);
+    return color;
   }
 
   Clip get containerClipBehavior {
@@ -474,14 +448,14 @@ class _FlexiChipRenderState extends AnimatedWidgetBaseState<_FlexiChipRender>
 
   Color get avatarBackgroundColor {
     final color = style.avatarBackgroundColor ?? foregroundColor;
-    return isFilled ? foregroundColor.withOpacity(.7) : color;
+    return style.isFilled ? foregroundColor.withOpacity(.7) : color;
   }
 
   Color get avatarForegroundColor {
     return style.avatarForegroundColor ??
-        (isFilled
+        (style.isFilled
             ? backgroundColor
-            : estimateSurfaceColor(avatarBackgroundColor)) ??
+            : FlexiChipStyle.colorOnSurface(avatarBackgroundColor)) ??
         foregroundColor;
   }
 
